@@ -1,6 +1,8 @@
 
 # PACMOS
 
+<img src="man/figures/PACMOS_logo.png" align="right" width="130" style="margin-left:50px;"/>
+
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/lipikakalson/PACMOS/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/lipikakalson/PACMOS/actions/workflows/R-CMD-check.yaml)
