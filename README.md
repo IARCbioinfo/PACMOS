@@ -12,8 +12,15 @@ stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://
 MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 <!-- badges: end -->
 
-The goal of PACMOS is to …
+This R package provides a streamlined workflow to integrate query samples into reference MOFA (Multi-Omics Factor Analysis) models, perform inference (fuzzy/hard clustering), and visualize biological patterns.
 
+The package is designed for reproducible, modular analysis of multi-omics datasets, enabling:
+<ul>Integration of query samples into existing MOFA inputs.
+<ul>MOFA model retraining.
+<ul>Projection of query samples into reference latent spaces.
+<ul>Fuzzy/Hard clustering.
+<ul>Visualization of clustering.
+  
 ## Installation
 
 You can install the development version of PACMOS from
