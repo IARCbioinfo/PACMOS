@@ -33,35 +33,30 @@ You can install the development version of PACMOS from
 devtools::install_github("lipikakalson/PACMOS")
 ```
 
-## Example
+## Tutorial
+A tutorial on the usage of PACMOS is available in the vignette, which is available at this link[].
 
-This is a basic example which shows you how to solve a common problem:
+## Functions
 
-``` r
-library(PACMOS)
-## basic example code
+#### Step 1
+This function adds one or more query samples to reference MOFA input matrices in an incremental manner. Each query matrix is matched to a specific MOFA data layer, and the corresponding values are inserted into the reference matrices. For all other layers, NA values are added to maintain consistent structure across views.
+
+The updated matrices (reference + one query sample) are saved as `.RData` files
 ```
-
-What is special about using `README.Rmd` instead of just `README.md`?
-You can include R chunks like so:
-
-``` r
-summary(cars)
-#>      speed           dist       
-#>  Min.   : 4.0   Min.   :  2.00  
-#>  1st Qu.:12.0   1st Qu.: 26.00  
-#>  Median :15.0   Median : 36.00  
-#>  Mean   :15.4   Mean   : 42.98  
-#>  3rd Qu.:19.0   3rd Qu.: 56.00  
-#>  Max.   :25.0   Max.   :120.00
+PACMOS::s1_add_sample_to_mofa(
+      query_matrix_path = c('query_expr.csv', 'query_met.csv'),
+      mofa_dir = mofa_dir,
+      value_data_types = c('D_expr_MOFA', 'D_met_MOFA'),
+      outdir = out_dir,
+      python_bin = python_path
+    )
 ```
+where,
+query_matrix_path =  Character vector of CSV file paths containing query sample matrices.
+mofa_dir =  Directory containing reference MOFA `.RData` matrices.
+value_data_types = Character vector of MOFA object names indicating which layer each query matrix corresponds to. Must be the same length as `query_matrix_path`.
+outdir = Directory where updated `.RData` matrices will be written.
+python_bin = Path to the Python binary used by the MOFA environment via the `reticulate` package
 
-You’ll still need to render `README.Rmd` regularly, to keep `README.md`
-up-to-date. `devtools::build_readme()` is handy for this.
 
-You can also embed plots, for example:
 
-<img src="man/figures/README-pressure-1.png" width="100%" />
-
-In that case, don’t forget to commit and push the resulting figure
-files, so they display on GitHub and CRAN.
