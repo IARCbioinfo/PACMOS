@@ -52,13 +52,13 @@ PACMOS::s1_add_sample_to_mofa(
     )
 ```
 where,
-<ul>
-  query_matrix_path =  Character vector of CSV file paths containing query sample matrices.
-  mofa_dir =  Directory containing reference MOFA `.RData` matrices.
-  value_data_types = Character vector of MOFA object names indicating which layer each query matrix corresponds to. Must be the same length as `query_matrix_path`.
-  outdir = Directory where updated `.RData` matrices will be written.
-  python_bin = Path to the Python binary used by the MOFA environment via the `reticulate` package
-</ul>
+<ol>
+  <li>query_matrix_path =  Character vector of CSV file paths containing query sample matrices.</li>
+  <li>mofa_dir =  Directory containing reference MOFA `.RData` matrices.</li>
+  <li>value_data_types = Character vector of MOFA object names indicating which layer each query matrix corresponds to. Must be the same length as `query_matrix_path`.</li>
+  <li>outdir = Directory where updated `.RData` matrices will be written.</li>
+  <li>python_bin = Path to the Python binary used by the MOFA environment via the `reticulate` package.</li>
+</ol>
 
 
 
