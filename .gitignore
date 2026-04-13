@@ -1,0 +1,21 @@
+# Ignore root R data
+.RData
+
+# Ignore large data in inst
+inst/extdata/*/*.RData
+inst/extdata/*/*.csv
+
+# Ignore logs
+logs/
+*/logs/
+
+# Ignore outputs
+*.out
+*.err
+
+# Ignore analysis
+Analysis_010426/
+
+# R stuff
+.Rhistory
+.Rproj.user/
