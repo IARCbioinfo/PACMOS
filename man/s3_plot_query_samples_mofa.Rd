@@ -14,12 +14,15 @@ s3_plot_query_samples_mofa(
   id_col = NULL,
   group = "group1",
   python_bin,
-  out_plot_dir = NULL,
+  plot_dir = NULL,
   prefix = ""
 )
 }
 \arguments{
-\item{models_dir}{Character. Directory containing \code{MOFA-*.hdf5} files.}
+\item{models_dir}{Character. Root folder containing output of
+`s2_run_MOFA()`.}
+
+\item{matrices_subdir}{Folder name where `.hdf5` files are stored.}
 
 \item{query_sample}{Character. Sample ID of the query sample.}
 
@@ -35,9 +38,9 @@ If NULL, uses "Sample" if present, otherwise the first column.}
 
 \item{python_bin}{Path to Python binary for \code{reticulate}.}
 
-\item{prefix}{Optional character prefix for all written files.}
-
 \item{plot_dir}{Output directory. Defaults to \code{models_dir/plots}.}
+
+\item{prefix}{Optional character prefix for all written files.}
 }
 \value{
 Invisibly returns a data.frame of aggregated alignment metrics

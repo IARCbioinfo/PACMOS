@@ -19,6 +19,11 @@ s2_run_mofa(
 )
 }
 \arguments{
+\item{models_dir}{Root folder containing `.RData` matrices created by
+`s1_add_sample_to_mofa()`.}
+
+\item{matrices_subdir}{Folder name where `.RData` files are stored.}
+
 \item{num_factors}{Integer. Number of latent factors.}
 
 \item{convergence_mode}{MOFA convergence mode (`"slow"` or `"fast"`).}
@@ -48,11 +53,6 @@ views_map = c(
 
 \item{binary_views}{Character vector specifying which views contain
 binary data (e.g. mutation or alteration layers).}
-
-\item{inputs_dir}{Directory containing `.RData` matrices created by
-`s1_add_sample_to_mofa()`.}
-
-\item{outdir}{Directory where MOFA HDF5 models will be written.}
 }
 \value{
 Invisibly returns TRUE when MOFA training completes.

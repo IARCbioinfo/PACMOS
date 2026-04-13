@@ -9,10 +9,10 @@
 #'
 #' @name s2_run_mofa
 #'
-#' @param inputs_dir Directory containing `.RData` matrices created by
+#' @param models_dir Root folder containing `.RData` matrices created by
 #' `s1_add_sample_to_mofa()`.
 #'
-#' @param outdir Directory where MOFA HDF5 models will be written.
+#' @param matrices_subdir Folder name where `.RData` files are stored.
 #'
 #' @param num_factors Integer. Number of latent factors.
 #'
@@ -193,7 +193,7 @@ s2_run_mofa <- function(
   }
 
   # ----Summary ------------------------------------------------------
-  message("\n─ Run summary ─")
+  message("\n- Run summary -")
   for (nm in names(results))
     message("  ", nm, ": ", results[[nm]])
 

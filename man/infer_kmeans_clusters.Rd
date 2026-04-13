@@ -39,7 +39,7 @@ For each sample folder in \code{models_dir}, loads the
 \code{<sample_id>_stable_input.csv}, runs k-means clustering
 on ALL samples, and saves one CSV per sample:
 \itemize{
-  \item \code{<sample_id>_sample_clusters.csv} — sample | kmeans_cluster
+  \item \code{<sample_id>_sample_clusters.csv} - sample |kmeans_cluster
 }
 Cluster-to-label mapping can be done separately afterwards.
 }

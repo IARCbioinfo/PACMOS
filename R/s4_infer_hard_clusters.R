@@ -4,7 +4,7 @@
 #' \code{<sample_id>_stable_input.csv}, runs k-means clustering
 #' on ALL samples, and saves one CSV per sample:
 #' \itemize{
-#'   \item \code{<sample_id>_sample_clusters.csv} — sample | kmeans_cluster
+#'   \item \code{<sample_id>_sample_clusters.csv} - sample |kmeans_cluster
 #' }
 #' Cluster-to-label mapping can be done separately afterwards.
 #'
@@ -50,7 +50,7 @@ infer_kmeans_clusters <- function(
   if (missing(lf_cols) || !is.character(lf_cols) || !length(lf_cols))
     stop("lf_cols must be a non-empty character vector of column names.")
 
-  message("K-means settings — k: ", k,
+  message("K-means settings - k: ", k,
           " | features: ", paste(lf_cols, collapse = ", "),
           " | seed: ", seed)
 

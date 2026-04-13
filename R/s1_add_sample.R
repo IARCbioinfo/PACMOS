@@ -102,7 +102,7 @@ s1_add_sample_to_mofa <- function(query_matrix_path,
 
 
   # ---- display pairing information ------------------------------------------
-  cat("✓ Pairing (query_matrix_path -> data_type):\n")
+  cat("- Pairing (query_matrix_path -> data_type):\n")
 
   for (i in seq_along(query_matrix_path)) {
 

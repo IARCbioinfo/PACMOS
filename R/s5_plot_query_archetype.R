@@ -222,12 +222,12 @@ plot_fuzzy_query_sample <- function(
     .draw_vertices(1:3, vertex_labels, vcols)
   }
 
-  ## Stacked bar — query sample archetype composition
+  ## Stacked bar - query sample archetype composition
   .draw_stacked_bar <- function(weights, samples, vertex_labels,
                                 vcols, query_sample) {
     idx <- which(samples == query_sample)
     if (!length(idx)) {
-      warning("query sample not found — skipping bar page.")
+      warning("query sample not found - skipping bar page.")
       return(invisible(NULL))
     }
 

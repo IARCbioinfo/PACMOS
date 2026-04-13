@@ -5,7 +5,10 @@
 #'
 #' @name s3_plot_query_samples_mofa
 #'
-#' @param models_dir Character. Directory containing \code{MOFA-*.hdf5} files.
+#' @param models_dir Character. Root folder containing output of
+#' `s2_run_MOFA()`.
+#'
+#' @param matrices_subdir Folder name where `.hdf5` files are stored.
 #'
 #' @param query_sample Character. Sample ID of the query sample.
 #'
@@ -38,7 +41,7 @@ s3_plot_query_samples_mofa <- function(
     id_col       = NULL,
     group        = "group1",
     python_bin,
-    out_plot_dir = NULL,
+    plot_dir = NULL,
     prefix       = ""
 ) {
 
@@ -273,7 +276,7 @@ s3_plot_query_samples_mofa <- function(
 
     inputs_dir  <- file.path(sdir, matrices_subdir)
 
-    plot_dir <- if (!is.null(out_plot_dir)) out_plot_dir else
+    plot_dir <- if (!is.null(plot_dir)) plot_dir else
       file.path(inputs_dir, "plots")
 
     if (!dir.exists(plot_dir))
