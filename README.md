@@ -79,11 +79,11 @@ PACMOS::s2_run_mofa(
 ```
 where,
 <ol>
-  <li>project_dir     =  Root folder containing `.RData` matrices created by `s1_add_sample_to_mofa()`.</li>
+  <li>models_dir      =  Root folder containing `.RData` matrices created by `s1_add_sample_to_mofa()`.</li>
   <li>matrices_subdir =  Folder name where `.RData` files are stored.</li>
-  <li>python_bin      = Path to the Python binary used by the MOFA environment via the `reticulate` package.</li>
-  <li>views_map       = Named character vector mapping view names to matrix object names.</li>
-  <li>binary_views    = Character vector specifying which views contain binary data</li>
+  <li>python_bin      =  Path to the Python binary used by the MOFA environment via the `reticulate` package.</li>
+  <li>views_map       =  Named character vector mapping view names to matrix object names.</li>
+  <li>binary_views    =  Character vector specifying which views contain binary data</li>
 </ol>
 
 ### Step 3
@@ -103,12 +103,100 @@ PACMOS::s3_plot_query_samples_mofa(
 ```
 where,
 <ol>
-  <li>models_dir =  Root folder containing `.RData` matrices created by `s1_add_sample_to_mofa()`.</li>
+  <li>models_dir      =  Root folder containing output of `s2_run_MOFA()`. (out_dir) </li>
   <li>matrices_subdir =  Folder name where `.RData` files are stored.</li>
   <li>query_sample    =  Sample ID of the query sample.</li>
   <li>reference_LFs   =  data.frame or path to CSV containing reference latent factors.</li>
   <li>reference_axes  =  Character vector of reference axis column names we need to match and align.</li>
   <li>binary_views    =  Character vector specifying which views contain binary data</li>
   <li>python_bin      =  Path to the Python binary used by the MOFA environment via the `reticulate` package.</li>
+</ol>
 
+## FUZZY CLUSTERING
+### Step 4
+This function estimates the degree to which each query sample belongs to each biological archetype predefined in reference multiomics data using a fuzzy weighting approach.
+```
+archetype_coords <- data.frame(
+  Archetype = c("a", "b", "c"), # archetypes
+  LF1 = c(
+    -3.59733245242571,
+    -1.79807036681759,
+    3.85856701073313
+  ),
+  LF2 = c(
+    -2.39600999565261,
+    3.56348237698459,
+    -0.825586204203109
+  ), # archetype coordinates in LF space
+  stringsAsFactors = FALSE
+)
+
+PACMOS::infer_fuzzy_weights(
+  models_dir      = out_dir,
+  matrices_subdir = "inputs",
+  coord           = archetype_coords,
+  n_archetypes    = 3
+```
+where,
+<ol>
+  <li>models_dir      =  Root folder. (out_dir) </li>
+  <li>matrices_subdir =  Folder name where `.RData` files are stored.</li>
+  <li>coord           =  Data frame of archetype coordinates</li>
+  <li>n_archetypes    =  Expected number of archetypes.</li>
+</ol>
+
+### Step 5
+This function visualizes the archetype composition of query samples in the reference archetypal space based on the inferred fuzzy weights.
+```
+PACMOS::plot_fuzzy_query_sample(
+  models_dir        = out_dir,
+  matrices_subdir   = "inputs"
+)
+```
+where,
+<ol>
+  <li>models_dir      =  Root folder. (out_dir) </li>
+  <li>matrices_subdir =  Folder name where `.RData` files are stored.</li>
+</ol>
+
+## HARD CLUSTERING
+### Step 4
+This function assigns each query sample to a discrete cluster using k-means clustering in the latent factor space.
+```
+PACMOS::infer_kmeans_labels(
+  models_dir      = out_dir",
+  matrices_subdir = "inputs",
+  k               = 4, # number of clusters
+  lf_cols         = c("LF1", "LF2", "LF3")
+)
+
+```
+where,
+<ol>
+  <li>models_dir      =  Root folder. (out_dir) </li>
+  <li>matrices_subdir =  Folder name where `.RData` files are stored.</li>
+  <li>k               =  Number of k-means clusters.</li>
+  <li>lf_cols         =  LF columns to use as features for k-means.</li>
+</ol>
+
+### Step 5
+This function visualizes the hard clustering results obtained from infer_kmeans_clusters().
+```
+PACMOS::plot_kmeans_query_sample(
+    models_dir      = loo_root,
+    matrices_subdir = "train_test_Meth_only",
+    lf_cols         = c("Factor1", "Factor2", "Factor5"),
+    ref_labels_path = ref_file,
+    ref_cols        = c("sample", "bio_label"),
+    query_sample    = sid
+  )
+```
+where,
+<ol>
+  <li>models_dir      =  Root folder. (out_dir) </li>
+  <li>matrices_subdir =  Folder name where `.RData` files are stored.</li>
+  <li>lf_cols         =  LF columns to use as features for k-means. (used for plotting) </li>
+  <li>ref_labels_path =  Path to CSV containing reference labels.
+  <li>ref_cols        =  Character vector of length 2. Column names in the `ref_labels_path` CSV to use. E.g. c("sample", "bio_label")</li>
+  <li>query_sample    =  query_sample </li>
 </ol>
