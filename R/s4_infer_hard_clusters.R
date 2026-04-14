@@ -4,23 +4,19 @@
 #' \code{<sample_id>_stable_input.csv}, runs k-means clustering
 #' on ALL samples, and saves one CSV per sample:
 #' \itemize{
-#'   \item \code{<sample_id>_sample_clusters.csv} - sample |kmeans_cluster
+#'   \item \code{<sample_id>_sample_clusters.csv} - sample | kmeans_cluster
 #' }
 #' Cluster-to-label mapping can be done separately afterwards.
 #'
 #' @name infer_kmeans_clusters
 #'
-#' @param models_dir      Character. Root directory containing per-sample
-#'   subdirectories.
+#' @param models_dir      Character. Root directory.
 #'
-#' @param matrices_subdir Character. Subdirectory within each sample folder
-#'   containing the \code{plots/} output.
-#'   Default \code{"train_test_all_omics"}.
+#' @param matrices_subdir Character. Folder name where `.RData` files are stored.
 #'
 #' @param k               Integer. Number of k-means clusters.
 #'
-#' @param lf_cols         Character vector. Column names in stable_input to
-#'   use as features for k-means.
+#' @param lf_cols         Character vector. LF columns to use as features for k-means.
 #'
 #' @param prefix          Optional character prefix for output files.
 #'
@@ -32,7 +28,7 @@
 #' @export
 infer_kmeans_clusters <- function(
     models_dir,
-    matrices_subdir = "train_test_all_omics",
+    matrices_subdir,
     k,
     lf_cols,
     prefix  = "",

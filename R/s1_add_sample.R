@@ -77,7 +77,7 @@ s1_add_sample_to_mofa <- function(query_matrix_path,
 
 
   # ---- Load reference MOFA matrices -----------------------------------------
-  mofa_inputs <- list()
+  mofa_inputs_sample <- list()
 
   rdata_files <- list.files(
     mofa_dir,
@@ -95,7 +95,7 @@ s1_add_sample_to_mofa <- function(query_matrix_path,
       obj <- get(nm, envir = tenv)
 
       # ensure data.frame structure
-      mofa_inputs[[nm]] <- as.data.frame(obj, check.names = FALSE)
+      mofa_inputs_sample[[nm]] <- as.data.frame(obj, check.names = FALSE)
 
     }
   }
@@ -176,14 +176,25 @@ s1_add_sample_to_mofa <- function(query_matrix_path,
     # ---- iterate through each query sample -----------------------------------
     for (sample_name in sample_names) {
 
+      mofa_inputs_current <- lapply(mofa_inputs_sample, function(x) x)
+
+      sample_dir <- file.path(outdir, sample_name)
+      inputs_dir <- file.path(sample_dir, "inputs")
+
+      dir.create(inputs_dir, recursive = TRUE, showWarnings = FALSE)
+
+      cat("\n==============================\n")
+      cat("Processing sample: ", sample_name, "\n")
+      cat("==============================\n")
+
       sample_column <- query_matrix[, c("gene_id", sample_name)]
 
 
       # ---- iterate through all MOFA layers ----------------------------------
-      for (data_type in names(mofa_inputs)) {
+      for (data_type in names(mofa_inputs_sample)) {
 
         mat <- as.data.frame(
-          mofa_inputs[[data_type]],
+          mofa_inputs_sample[[data_type]],
           check.names = FALSE
         )
 
@@ -260,10 +271,7 @@ s1_add_sample_to_mofa <- function(query_matrix_path,
 
         }
 
-
-        # ---- persist updates -------------------------------------------------
-        mofa_inputs[[data_type]] <- mat
-
+        mofa_inputs_current[[data_type]] <- mat
 
         # ---- save matrix -----------------------------------------------------
         obj_to_save <- data_type
@@ -273,32 +281,21 @@ s1_add_sample_to_mofa <- function(query_matrix_path,
         save(
           list = obj_to_save,
           file = file.path(
-            outdir,
+            inputs_dir,
             paste0(data_type, "_", sample_name, ".RData")
+
           )
         )
 
-        cat(
-          paste0(
-            "- Saved: ",
-            data_type,
-            "_",
-            sample_name,
-            ".RData\n"
-          )
-        )
+        cat("   ↳ Saved: ", data_type, "_", sample_name, ".RData\n", sep = "")
+
 
       }
 
 
       cat(
-        "All matrices processed for sample: ",
-        sample_name,
-        " (file #",
-        i,
-        " paired with ",
-        paired_type,
-        ")\n",
+        "\n Completed sample: ", sample_name,
+        " (file #", i, " paired with ", paired_type, ")\n\n",
         sep = ""
       )
 

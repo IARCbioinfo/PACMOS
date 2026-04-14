@@ -15,7 +15,7 @@
 #' @param reference_LFs data.frame or path to CSV containing reference latent
 #'   factors. Must contain \code{id_col} and all \code{reference_axes} columns.
 #'
-#' @param reference_axes Character vector of reference axis column names we need to match and align.
+#' @param reference_axes Character vector of reference axis column names (latent factors) we need to match and align.
 #'
 #' @param id_col Column name for sample IDs in \code{reference_LFs}.
 #'   If NULL, uses "Sample" if present, otherwise the first column.
@@ -195,7 +195,7 @@ s3_plot_query_samples_mofa <- function(
         midpoint = 0, limits = c(-1, 1), name = "Pearson r"
       ) +
       ggplot2::labs(
-        title    = paste0(sample_id, "  \u2014  Factor Matching and Aligning correlation heatmap"),
+        title    = paste0(sample_id),
         subtitle = "bold border = Assigned factor for that reference axis",
         x = "Reference MOFA axes", y = "Retrained MOFA factors"
       ) +

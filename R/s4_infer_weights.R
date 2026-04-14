@@ -13,11 +13,9 @@
 #'
 #' @name infer_fuzzy_weights
 #'
-#' @param models_dir      Character. Root directory containing per-sample
-#'   subdirectories.
+#' @param models_dir      Character. Root directory
 #'
-#' @param matrices_subdir Character. Subdirectory within each sample folder
-#'   containing the \code{plots/} output. Default \code{"train_test_all_omics"}.
+#' @param matrices_subdir Character. Folder name where `.RData` files are stored.
 #'
 #' @param coord           data.frame of archetype coordinates. Either:
 #'   (A) first column = archetype names, remaining columns = coordinates, or
@@ -37,7 +35,7 @@
 #' @export
 infer_fuzzy_weights <- function(
     models_dir,
-    matrices_subdir = "train_test_all_omics",
+    matrices_subdir,
     coord,
     n_archetypes,
     out_dir  = file.path(models_dir, "archetype_weights"),
