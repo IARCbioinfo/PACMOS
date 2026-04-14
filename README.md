@@ -14,7 +14,7 @@ MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 
 This R package provides a streamlined workflow to integrate query samples into reference MOFA (Multi-Omics Factor Analysis) models, perform inference (fuzzy/hard clustering), and visualize biological patterns.
 
-The package is designed for reproducible, modular analysis of multi-omics datasets, enabling:
+The package is designed for reproducible multi-omics datasets, enabling:
 <ul>
   <li>Integration of query samples into existing MOFA inputs.</li>
   <li>MOFA model retraining.</li>
