@@ -203,12 +203,13 @@ where,
 
 ## Output directory structure
 ```
-Output directory structure:
-  <outdir>/
-    <query_sample>/
-      <inputs>/
-        value_data_type_query_sample.RData (Step 1 output)
+<outdir>/
+  <query_sample>/
+    <inputs>/
+      value_data_type_query_sample.RData (Step 1 output)
+
         MOFA-query_sample.hdf5 (Step 2 output)
+
         <plots>/
           #--Step 3 outputs--
           query_sample_projection.pdf
