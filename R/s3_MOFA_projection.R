@@ -467,7 +467,7 @@ s3_plot_query_samples_mofa <- function(
   ##                      paste0(prefix, "all_samples_quality_check_metrics.csv"))
   #write.csv(all_metrics_df, agg_path, row.names = FALSE)
 
-  message("")
+  #message("")
   message(strrep("=", 45))
   #message("  All ", n_models, " model(s) processed.")
   #message("  Aggregated metrics: ", agg_path)

@@ -6,8 +6,8 @@
 #' by constrained least squares for ALL samples in stable_input, and
 #' writes two CSVs per sample:
 #' \itemize{
-#'   \item \code{<sample_id>_archetype_weights.csv} — query sample only
-#'   \item \code{<sample_id>_archetype_weights_all_samples.csv} — all samples
+#'   \item \code{<sample_id>_archetype_weights.csv} - query sample only
+#'   \item \code{<sample_id>_archetype_weights_all_samples.csv} - all samples
 #' }
 #' An aggregated CSV (query rows only) is written to \code{out_dir}.
 #'
