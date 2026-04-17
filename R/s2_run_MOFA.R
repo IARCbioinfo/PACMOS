@@ -111,7 +111,9 @@ s2_run_mofa <- function(
       next
     }
 
-    message("\n- Processing sample: ", sample_name, " -")
+    cat("\n==============================\n")
+    cat("Processing sample: ", sample_name, "\n")
+    cat("==============================\n")
 
     tryCatch({
 
