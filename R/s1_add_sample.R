@@ -287,7 +287,7 @@ s1_add_sample_to_mofa <- function(query_matrix_path,
           )
         )
 
-        cat("   ↳ Saved: ", data_type, "_", sample_name, ".RData\n", sep = "")
+        cat("   |_ Saved: ", data_type, "_", sample_name, ".RData\n", sep = "")
 
 
       }

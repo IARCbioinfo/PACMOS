@@ -18,12 +18,11 @@
 #' @param ref_labels_path Character. Path to CSV containing reference labels.
 #'
 #' @param ref_cols        Character vector of length 2:
-#'   \code{c(sample_col, label_col)} — column names in the ref_labels CSV.
+#'   \code{c(sample_col, label_col)} - column names in the ref_labels CSV.
 #'   E.g. \code{c("sample", "bio_label")} or
 #'   \code{c("sample", "mapped_bio_label")}.
 #'
-#' @param query_sample    Character. Sample ID to highlight (red diamond with
-#'   black border) on scatter plots. Restricts processing to this folder only.
+#' @param sample_pattern    Character. Sample ID patterns.
 #'
 #' @param prefix          Optional character prefix for output files.
 #'
