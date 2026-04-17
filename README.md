@@ -34,7 +34,7 @@ devtools::install_github("lipikakalson/PACMOS")
 ```
 
 ## Tutorial
-A tutorial on the usage of PACMOS is available in the vignette, which is available at this link[].
+A tutorial on the usage of PACMOS is available in the docs, which is available at this [link](https://github.com/lipikakalson/PACMOS/blob/main/doc/PACMOS-tutorial.html).
 
 ## Functions
 
