@@ -6,22 +6,20 @@
 \usage{
 plot_kmeans_query_sample(
   models_dir,
-  matrices_subdir = "train_test_all_omics",
+  matrices_subdir,
   lf_cols,
   ref_labels_path,
   ref_cols,
-  query_sample,
+  sample_pattern = "",
   prefix = ""
 )
 }
 \arguments{
-\item{models_dir}{Character. Root directory containing per-sample
-subdirectories.}
+\item{models_dir}{Character. Root directory.}
 
-\item{matrices_subdir}{Character. Subdirectory within each sample folder
-containing the \code{plots/} output.}
+\item{matrices_subdir}{Character. Folder name where `.RData` files are stored..}
 
-\item{lf_cols}{Character vector. LF column names for scatter plots.
+\item{lf_cols}{Character vector. LF columns to use as features for k-means.
 All pairwise combinations are plotted.}
 
 \item{ref_labels_path}{Character. Path to CSV containing reference labels.}
@@ -31,10 +29,10 @@ All pairwise combinations are plotted.}
 E.g. \code{c("sample", "bio_label")} or
 \code{c("sample", "mapped_bio_label")}.}
 
+\item{prefix}{Optional character prefix for output files.}
+
 \item{query_sample}{Character. Sample ID to highlight (red diamond with
 black border) on scatter plots. Restricts processing to this folder only.}
-
-\item{prefix}{Optional character prefix for output files.}
 }
 \value{
 Invisibly returns NULL.

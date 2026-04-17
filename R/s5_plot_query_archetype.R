@@ -1,15 +1,14 @@
 #' Plot archetype weight projections
 #'
-#' For each sample folder in \code{base_dir}, reads
+#' For each sample folder in \code{models_dir}, reads
 #' \code{<sample_id>_archetype_weights_all_samples.csv} from
 #' \code{<sample_dir>/<matrices_subdir>/plots/} and generates
 #' ternary projection PDFs saved alongside the CSV.
 #'
 #' @name plot_fuzzy_query_sample
 #'
-#' @param base_dir        Character. Root directory.
-#' @param matrices_subdir Character. Subdirectory within each sample folder
-#'   (e.g. \code{"train_test_all_omics"}). Default \code{"train_test_all_omics"}.
+#' @param models_dir        Character. Root directory.
+#' @param matrices_subdir Character. Folder name where `.RData` files are stored.
 #' @param sample_pattern  Regex to filter sample folder names. Default \code{""} (all).
 #' @param prefix          Optional prefix for output PDF filenames.
 #'
@@ -18,14 +17,14 @@
 #' @importFrom Ternary TernaryPlot TernaryPoints AddToTernary
 #' @export
 plot_fuzzy_query_sample <- function(
-    base_dir,
-    matrices_subdir  = "train_test_all_omics",
+    models_dir,
+    matrices_subdir ,
     sample_pattern   = "",
     prefix           = ""
 ) {
 
-  if (!dir.exists(base_dir))
-    stop("base_dir does not exist: ", base_dir)
+  if (!dir.exists(models_dir))
+    stop("models_dir does not exist: ", models_dir)
 
   if (!requireNamespace("Ternary", quietly = TRUE))
     stop("Package 'Ternary' is required. Install with: install.packages('Ternary')")
@@ -282,12 +281,12 @@ plot_fuzzy_query_sample <- function(
 
   # ---- sample loop ---------------------------------------------------------
 
-  all_subdirs <- list.dirs(base_dir, full.names = TRUE, recursive = FALSE)
+  all_subdirs <- list.dirs(models_dir, full.names = TRUE, recursive = FALSE)
   sample_dirs <- all_subdirs[grepl(sample_pattern, basename(all_subdirs))]
 
   if (!length(sample_dirs))
     stop("No subdirectories matching pattern '", sample_pattern,
-         "' found in: ", base_dir)
+         "' found in: ", models_dir)
 
   message("Found ", length(sample_dirs), " sample folder(s).")
 

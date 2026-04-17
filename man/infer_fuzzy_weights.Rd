@@ -6,7 +6,7 @@
 \usage{
 infer_fuzzy_weights(
   models_dir,
-  matrices_subdir = "train_test_all_omics",
+  matrices_subdir,
   coord,
   n_archetypes,
   out_dir = file.path(models_dir, "archetype_weights"),
@@ -14,11 +14,9 @@ infer_fuzzy_weights(
 )
 }
 \arguments{
-\item{models_dir}{Character. Root directory containing per-sample
-subdirectories.}
+\item{models_dir}{Character. Root directory}
 
-\item{matrices_subdir}{Character. Subdirectory within each sample folder
-containing the \code{plots/} output. Default \code{"train_test_all_omics"}.}
+\item{matrices_subdir}{Character. Folder name where `.RData` files are stored.}
 
 \item{coord}{data.frame of archetype coordinates. Either:
 (A) first column = archetype names, remaining columns = coordinates, or

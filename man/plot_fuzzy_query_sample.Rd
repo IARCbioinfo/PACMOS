@@ -5,17 +5,16 @@
 \title{Plot archetype weight projections}
 \usage{
 plot_fuzzy_query_sample(
-  base_dir,
-  matrices_subdir = "train_test_all_omics",
+  models_dir,
+  matrices_subdir,
   sample_pattern = "",
   prefix = ""
 )
 }
 \arguments{
-\item{base_dir}{Character. Root directory.}
+\item{models_dir}{Character. Root directory.}
 
-\item{matrices_subdir}{Character. Subdirectory within each sample folder
-(e.g. \code{"train_test_all_omics"}). Default \code{"train_test_all_omics"}.}
+\item{matrices_subdir}{Character. Folder name where `.RData` files are stored.}
 
 \item{sample_pattern}{Regex to filter sample folder names. Default \code{""} (all).}
 
@@ -25,7 +24,7 @@ plot_fuzzy_query_sample(
 Invisibly returns a named logical vector (sample processed = TRUE).
 }
 \description{
-For each sample folder in \code{base_dir}, reads
+For each sample folder in \code{models_dir}, reads
 \code{<sample_id>_archetype_weights_all_samples.csv} from
 \code{<sample_dir>/<matrices_subdir>/plots/} and generates
 ternary projection PDFs saved alongside the CSV.
