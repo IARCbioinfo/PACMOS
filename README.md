@@ -200,3 +200,29 @@ where,
   <li>ref_cols        =  Character vector of length 2. Column names in the `ref_labels_path` CSV to use. E.g. c("sample", "bio_label")</li>
   <li>query_sample    =  query_sample </li>
 </ol>
+
+## Output directory structure
+```
+Output directory structure:
+  <outdir>/
+    <query_sample>/
+      <inputs>/
+        value_data_type_query_sample.RData (Step 1 output)
+        MOFA-query_sample.hdf5 (Step 2 output)
+        <plots>/
+          #--Step 3 outputs--
+          query_sample_projection.pdf
+          query_sample__quality_check_metrics.csv
+          query_sample__quality_check_metrics.pdf
+          query_sample_query_sample_LFs.csv
+          query_sample__retrained_LFs_all_samples.csv
+          query_sample__stable_input.csv
+
+          #--Step 4 output--
+          query_sample_archetype_weights_all_samples.csv
+          query_sample__archetype_weights.csv
+
+          #--Step5 output--
+          query_sample__archetype_projection.pdf
+
+```
