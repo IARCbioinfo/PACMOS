@@ -29,7 +29,7 @@ s3_plot_query_samples_mofa(
 \item{reference_LFs}{data.frame or path to CSV containing reference latent
 factors. Must contain \code{id_col} and all \code{reference_axes} columns.}
 
-\item{reference_axes}{Character vector of reference axis column names we need to match and align.}
+\item{reference_axes}{Character vector of reference axis column names (latent factors) we need to match and align.}
 
 \item{id_col}{Column name for sample IDs in \code{reference_LFs}.
 If NULL, uses "Sample" if present, otherwise the first column.}
