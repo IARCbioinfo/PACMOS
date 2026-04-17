@@ -1,7 +1,7 @@
 
 # PACMOS
 
-<img src="man/figures/PACMOS_logo.png" align="right" width="130" style="margin-left:50px;"/>
+<img src="man/figures/PACMOS_logo_v2.png" align="right" width="130" style="margin-left:50px;"/>
 
 <!-- badges: start -->
 
