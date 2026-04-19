@@ -18,5 +18,11 @@ Imports:
     reticulate (>= 1.30),
     scales,
     Ternary
+
+Suggests:
+    knitr,
+    rmarkdown,
+    MOFA2
+
 Remotes:
     bioFAM/MOFA2
