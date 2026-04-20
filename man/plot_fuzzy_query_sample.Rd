@@ -43,10 +43,3 @@ generated for all combinations of three archetypes.
 
 Output PDFs are saved alongside the input CSV files in the `plots/` directory.
 }
-\examples{
-plot_fuzzy_query_sample(
-  models_dir = "query_output",
-  matrices_subdir = "inputs"
-)
-
-}

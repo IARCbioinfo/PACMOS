@@ -49,16 +49,6 @@
 #' @return Invisibly returns a data frame of alignment metrics
 #' for each reference axis. Output files (PDFs and CSVs) are written to output dir
 #'
-#' @examples
-#' s3_plot_query_samples_mofa(
-#'   models_dir = "query_output",
-#'   matrices_subdir = "inputs",
-#'   query_sample = "query_sample",
-#'   reference_LFs = "reference_latent_factors.csv",
-#'   reference_axes = c("LF1", "LF2"),
-#'   python_bin = "/usr/bin/python3"
-#' )
-#'
 #' @export
 s3_plot_query_samples_mofa <- function(
     models_dir,

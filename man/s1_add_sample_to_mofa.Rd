@@ -51,13 +51,3 @@ For the matched layer, real values from the query sample are inserted.
 For all other MOFA layers, a column containing `NA` values is added for that
 sample to maintain consistent sample structure across layers.
 }
-\examples{
-s1_add_sample_to_mofa(
-  query_matrix_path = c("expr_query.csv", "cnv_query.csv"),
-  mofa_dir = "path/to/reference_mofa/",
-  value_data_types = c("D_expr_MOFA", "D_cnv_MOFA"),
-  outdir = "query_output",
-  python_bin = "/usr/bin/python3"
-)
-
-}

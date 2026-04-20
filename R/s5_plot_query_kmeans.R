@@ -40,14 +40,6 @@
 #'
 #' @return Invisibly returns NULL.
 #'
-#' @examples
-#' plot_kmeans_query_sample(
-#'   models_dir = "query_output",
-#'   matrices_subdir = "inputs",
-#'   lf_cols = c("LF1", "LF2"),
-#'   ref_labels_path = "reference_labels.csv",
-#'   ref_cols = c("sample", "label")
-#' )
 #'
 #' @export
 plot_kmeans_query_sample <- function(

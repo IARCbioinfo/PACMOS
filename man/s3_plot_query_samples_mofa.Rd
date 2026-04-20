@@ -66,14 +66,3 @@ The function generates multiple outputs including:
   \item CSV files containing aligned latent factors and projection results
 }
 }
-\examples{
-s3_plot_query_samples_mofa(
-  models_dir = "query_output",
-  matrices_subdir = "inputs",
-  query_sample = "query_sample",
-  reference_LFs = "reference_latent_factors.csv",
-  reference_axes = c("LF1", "LF2"),
-  python_bin = "/usr/bin/python3"
-)
-
-}

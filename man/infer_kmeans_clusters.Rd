@@ -37,12 +37,3 @@ For each sample, a CSV file is written containing cluster assignments:
   \item `<sample_id>_sample_clusters.csv` — columns: sample, kmeans_cluster
 }
 }
-\examples{
-infer_kmeans_clusters(
-  models_dir = "query_output",
-  matrices_subdir = "inputs",
-  k = 3,
-  lf_cols = c("LF1", "LF2")
-)
-
-}

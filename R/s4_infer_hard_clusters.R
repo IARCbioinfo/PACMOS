@@ -32,13 +32,6 @@
 #'
 #' @return Invisibly returns NULL.
 #'
-#' @examples
-#' infer_kmeans_clusters(
-#'   models_dir = "query_output",
-#'   matrices_subdir = "inputs",
-#'   k = 3,
-#'   lf_cols = c("LF1", "LF2")
-#' )
 #'
 #' @export
 infer_kmeans_clusters <- function(
