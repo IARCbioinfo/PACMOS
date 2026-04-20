@@ -13,16 +13,9 @@ RoxygenNote: 7.2.3
 VignetteBuilder: knitr
 Suggests: knitr, rmarkdown
 Imports: 
-    ggplot2 (>= 3.5.0),
-    limSolve (>= 1.5.7),
-    reticulate (>= 1.30),
+    ggplot2,
+    limSolve,
+    MOFA2,
+    reticulate,
     scales,
     Ternary
-
-Suggests:
-    knitr,
-    rmarkdown,
-    MOFA2
-
-Remotes:
-    bioFAM/MOFA2
