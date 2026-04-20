@@ -11,7 +11,6 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.3
 VignetteBuilder: knitr
-Suggests: knitr, rmarkdown
 Imports: 
     ggplot2,
     limSolve,
@@ -19,10 +18,8 @@ Imports:
     reticulate,
     scales,
     Ternary
-
 Suggests: 
     knitr, 
     rmarkdown
-
 Remotes:
     bioFAM/MOFA2
