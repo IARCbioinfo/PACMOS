@@ -41,6 +41,15 @@
 #' Saves updated MOFA matrices as `.RData` files in `outdir`. One file is saved
 #' per `(data layer, sample)` combination.
 #'
+#' @examples
+#' s1_add_sample_to_mofa(
+#'   query_matrix_path = c("expr_query.csv", "cnv_query.csv"),
+#'   mofa_dir = "path/to/reference_mofa/",
+#'   value_data_types = c("D_expr_MOFA", "D_cnv_MOFA"),
+#'   outdir = "query_output",
+#'   python_bin = "/usr/bin/python3"
+#' )
+#'
 #' @export
 s1_add_sample_to_mofa <- function(query_matrix_path,
                                   mofa_dir = system.file("extdata/", package = "PACMOS"),

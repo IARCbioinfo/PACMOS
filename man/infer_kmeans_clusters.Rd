@@ -4,14 +4,7 @@
 \alias{infer_kmeans_clusters}
 \title{Infer K-means Cluster Labels from MOFA latent factors}
 \usage{
-infer_kmeans_clusters(
-  models_dir,
-  matrices_subdir,
-  k,
-  lf_cols,
-  prefix = "",
-  seed = 42
-)
+infer_kmeans_clusters(models_dir, matrices_subdir, k, lf_cols, prefix = "")
 }
 \arguments{
 \item{models_dir}{Character. Root directory.}
@@ -23,9 +16,6 @@ infer_kmeans_clusters(
 \item{lf_cols}{Character vector. LF columns to use as features for k-means.}
 
 \item{prefix}{Optional character prefix for output files.}
-
-\item{seed}{Integer. Random seed for reproducibility.
-Default \code{42}.}
 }
 \value{
 Invisibly returns NULL.
@@ -46,4 +36,13 @@ For each sample, a CSV file is written containing cluster assignments:
 \itemize{
   \item `<sample_id>_sample_clusters.csv` — columns: sample, kmeans_cluster
 }
+}
+\examples{
+infer_kmeans_clusters(
+  models_dir = "query_output",
+  matrices_subdir = "inputs",
+  k = 3,
+  lf_cols = c("LF1", "LF2")
+)
+
 }

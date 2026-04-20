@@ -1,6 +1,7 @@
 # Ignore logs
 logs/
 */logs/
+PACMOS.BiocCheck/
 
 # Ignore outputs
 *.out
@@ -13,3 +14,4 @@ Analysis_010426/
 .Rhistory
 .Rproj.user/
 /Meta/
+.RData

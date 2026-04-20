@@ -56,6 +56,20 @@
 #' @return Invisibly returns TRUE when MOFA training completes. Trained MOFA models are
 #' written to disk as `.hdf5` files.
 #'
+#' @examples
+#' s2_run_mofa(
+#'   models_dir = "query_output",
+#'   matrices_subdir = "inputs",
+#'   num_factors = 10,
+#'   convergence_mode = "slow",
+#'   maxiter = 1000,
+#'   python_bin = "/usr/bin/python3",
+#'   views_map = c(
+#'     RNA = "D_expr_MOFA",
+#'     CNV = "D_cnv_MOFA"
+#'   )
+#' )
+#'
 #' @export
 s2_run_mofa <- function(
     models_dir,

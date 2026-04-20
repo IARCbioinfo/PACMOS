@@ -42,6 +42,18 @@
 #' @return Invisibly returns a data.frame with columns
 #'   \code{Sample} + one column per archetype (query samples only).
 #'
+#' @examples
+#' infer_fuzzy_weights(
+#'   models_dir = "query_output",
+#'   matrices_subdir = "inputs",
+#'   coord = data.frame(
+#'     archetype = c("A1", "A2", "A3"),
+#'     LF1 = c(0.1, 0.5, 0.9),
+#'     LF2 = c(0.2, 0.6, 0.3)
+#'   ),
+#'   n_archetypes = 3
+#' )
+#'
 #' @export
 infer_fuzzy_weights <- function(
     models_dir,

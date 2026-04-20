@@ -29,7 +29,13 @@
 #'
 #' @return Invisibly returns a named logical vector (sample processed = TRUE).
 #'
-#' @importFrom Ternary TernaryPlot TernaryPoints AddToTernary
+#'
+#' @examples
+#' plot_fuzzy_query_sample(
+#'   models_dir = "query_output",
+#'   matrices_subdir = "inputs"
+#' )
+#'
 #' @export
 plot_fuzzy_query_sample <- function(
     models_dir,

@@ -29,10 +29,16 @@
 #'
 #' @param prefix          Optional character prefix for output files.
 #'
-#' @param seed            Integer. Random seed for reproducibility.
-#'   Default \code{42}.
 #'
 #' @return Invisibly returns NULL.
+#'
+#' @examples
+#' infer_kmeans_clusters(
+#'   models_dir = "query_output",
+#'   matrices_subdir = "inputs",
+#'   k = 3,
+#'   lf_cols = c("LF1", "LF2")
+#' )
 #'
 #' @export
 infer_kmeans_clusters <- function(
@@ -40,9 +46,8 @@ infer_kmeans_clusters <- function(
     matrices_subdir,
     k,
     lf_cols,
-    prefix  = "",
-    seed    = 42
-) {
+    prefix  = ""
+    ) {
 
   # ---- checks --------------------------------------------------------------
 
@@ -56,8 +61,7 @@ infer_kmeans_clusters <- function(
     stop("lf_cols must be a non-empty character vector of column names.")
 
   message("K-means settings - k: ", k,
-          " | features: ", paste(lf_cols, collapse = ", "),
-          " | seed: ", seed)
+          " | features: ", paste(lf_cols, collapse = ", "))
 
   # ---- discover valid sample dirs ------------------------------------------
 
@@ -111,7 +115,6 @@ infer_kmeans_clusters <- function(
 
     # ---- k-means on ALL samples in stable_input ----------------------------
 
-    set.seed(seed)
     km <- tryCatch(
       kmeans(lf_data, centers = k, nstart = 25, iter.max = 100),
       error = function(e) {

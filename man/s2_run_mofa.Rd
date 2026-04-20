@@ -73,3 +73,18 @@ a MOFA model.
 If `skip_existing = TRUE`, samples for which a model file already exists
 will be skipped.
 }
+\examples{
+s2_run_mofa(
+  models_dir = "query_output",
+  matrices_subdir = "inputs",
+  num_factors = 10,
+  convergence_mode = "slow",
+  maxiter = 1000,
+  python_bin = "/usr/bin/python3",
+  views_map = c(
+    RNA = "D_expr_MOFA",
+    CNV = "D_cnv_MOFA"
+  )
+)
+
+}
