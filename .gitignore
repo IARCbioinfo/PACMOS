@@ -15,3 +15,5 @@ Analysis_010426/
 .Rproj.user/
 /Meta/
 .RData
+*.RData
+PACMOS.BiocCheck/
