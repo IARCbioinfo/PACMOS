@@ -1,16 +1,20 @@
 #' Step 1: Add a query sample to reference MOFA input matrices
 #'
-#' Reads one or more query sample CSV matrices and appends the query sample(s)
-#' to the corresponding MOFA input matrices. The updated matrices are saved as
-#' individual `.RData` files that can be used for retraining MOFA models.
+#' @description
+#' Reads one or more query sample CSV matrices and appends query sample(s)
+#' to reference MOFA input matrices.
 #'
+#' @details
 #' Each query matrix must correspond to a specific MOFA input layer. The mapping
 #' between query matrices and MOFA layers is defined through the
 #' `value_data_types` argument, where each entry corresponds to the same index
 #' in `query_matrix_path`.
 #'
-#' For the matched layer, real values from the query sample are inserted. For
-#' all other MOFA layers, a column containing `NA` values is added for that
+#' The updated matrices are saved as individual `.RData` files that can be used
+#' for retraining MOFA models.
+#'
+#' For the matched layer, real values from the query sample are inserted.
+#' For all other MOFA layers, a column containing `NA` values is added for that
 #' sample to maintain consistent sample structure across layers.
 #'
 #'

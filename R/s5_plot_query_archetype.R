@@ -1,9 +1,24 @@
 #' Plot archetype weight projections
 #'
-#' For each sample folder in \code{models_dir}, reads
-#' \code{<sample_id>_archetype_weights_all_samples.csv} from
-#' \code{<sample_dir>/<matrices_subdir>/plots/} and generates
-#' ternary projection PDFs saved alongside the CSV.
+#' @description
+#' Visualizes archetype mixture weights for query and reference samples
+#' using ternary projections and composition plots.
+#'
+#' @details
+#' For each sample folder in `models_dir`, this function reads
+#' `<sample_id>_archetype_weights_all_samples.csv` produced by
+#' `infer_fuzzy_weights()` and generates a  PDF containing:
+#'
+#' \itemize{
+#'   \item Ternary plots showing sample positions in archetype space
+#'   \item Highlighted query sample projection
+#'   \item A stacked bar plot showing archetype composition of the query sample
+#' }
+#'
+#' If the number of archetypes exceeds three, multiple ternary panels are
+#' generated for all combinations of three archetypes.
+#'
+#' Output PDFs are saved alongside the input CSV files in the `plots/` directory.
 #'
 #' @name plot_fuzzy_query_sample
 #'

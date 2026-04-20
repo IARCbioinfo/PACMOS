@@ -1,10 +1,22 @@
 #' Plot K-means Clusters
 #'
-#' For each sample folder in \code{models_dir}, loads
-#' \code{<sample_id>_stable_input.csv} and
-#' \code{<sample_id>_sample_clusters.csv}, generates all pairwise
-#' scatter plots, maps clusters to biological labels via majority, and saves
-#' a heatmap and cluster-label mapping CSV.
+#' @description
+#' Visualizes k-means clustering results in latent factor (LF) space and
+#' maps clusters to known biological labels.
+#'
+#' @details
+#' For each sample folder in `models_dir`, this function:
+#' \itemize{
+#'   \item Loads `<sample_id>_stable_input.csv` (latent factor coordinates)
+#'   \item Loads `<sample_id>_sample_clusters.csv` (k-means cluster assignments)
+#'   \item Generates pairwise scatter plots for all combinations of `lf_cols`
+#'   \item Highlights the query sample in each plot
+#'   \item Maps clusters to biological labels using majority overlap with
+#'         `ref_labels_path`
+#'   \item Saves a scatter plot PDF
+#'   \item Saves a cluster-to-label mapping CSV
+#'   \item Saves a heatmap showing cluster vs biological label composition
+#' }
 #'
 #' @name plot_kmeans_query_sample
 #'

@@ -1,12 +1,21 @@
-#' Infer K-means Cluster Labels
+#' Infer K-means Cluster Labels from MOFA latent factors
 #'
-#' For each sample folder in \code{models_dir}, loads the
-#' \code{<sample_id>_stable_input.csv}, runs k-means clustering
-#' on ALL samples, and saves one CSV per sample:
+#' @description
+#' Performs k-means clustering on latent factor representations derived
+#' from Step 3 (`s3_plot_query_samples_mofa`).
+#'
+#' @details
+#' For each sample folder in `models_dir`, this function loads the
+#' `<sample_id>_stable_input.csv` file and performs k-means clustering
+#' on the selected latent factor columns (`lf_cols`).
+#'
+#' Clustering is performed across all samples present in the stable input,
+#' including both reference and query samples.
+#'
+#' For each sample, a CSV file is written containing cluster assignments:
 #' \itemize{
-#'   \item \code{<sample_id>_sample_clusters.csv} - sample | kmeans_cluster
+#'   \item `<sample_id>_sample_clusters.csv` — columns: sample, kmeans_cluster
 #' }
-#' Cluster-to-label mapping can be done separately afterwards.
 #'
 #' @name infer_kmeans_clusters
 #'

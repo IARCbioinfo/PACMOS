@@ -1,15 +1,25 @@
 #' Infer Archetype Weights
 #'
-#' For each sample folder in \code{models_dir}, loads the
-#' \code{<sample_id>_stable_input.csv} produced by
-#' \code{s3_plot_query_samples_mofa}, infers archetype mixture weights
-#' by constrained least squares for ALL samples in stable_input, and
-#' writes two CSVs per sample:
+#' @description
+#' Computes archetype mixture weights for samples based on MOFA latent factors
+#' derived from Step 3 (`s3_plot_query_samples_mofa`).
+#'
+#' @details
+#' For each sample folder in `models_dir`, this function loads the
+#' `<sample_id>_stable_input.csv` produced by
+#' `s3_plot_query_samples_mofa()` and infers archetype mixture weights
+#' using constrained least squares.
+#'
+#' Weights are computed for all samples in the `stable_input` matrix,
+#' including both reference and query samples.
+#'
+#' For each sample, two CSV files are written:
 #' \itemize{
-#'   \item \code{<sample_id>_archetype_weights.csv} - query sample only
-#'   \item \code{<sample_id>_archetype_weights_all_samples.csv} - all samples
+#'   \item `<sample_id>_archetype_weights.csv` — query sample only
+#'   \item `<sample_id>_archetype_weights_all_samples.csv` — all samples
 #' }
-#' An aggregated CSV (query rows only) is written to \code{out_dir}.
+#'
+#' Additionally, an aggregated CSV (query samples only) is written to `out_dir`.
 #'
 #' @name infer_fuzzy_weights
 #'

@@ -1,7 +1,25 @@
-#' Step 3: Match and align retrained MOFA latent factors to the reference MOFA factors and
-#' project query sample into the reference space
+#' Step 3:  Align retrained MOFA latent factors to reference space and project query sample
 #'
-#' For each MOFA2 HDF5 model in \code{models_dir}, this function:
+#' @description
+#' Matches and aligns latent factors from retrained MOFA models to a reference
+#' MOFA factor space and projects the query sample into that reference space.
+#'
+#' @details
+#' For each MOFA2 HDF5 model in `models_dir`, this function:
+#' \itemize{
+#'   \item Loads the retrained MOFA model
+#'   \item Computes correlations between retrained latent factors and reference latent factors
+#'   \item Assigns each reference axis to the best-matching retrained factor
+#'   \item Aligns factor signs to ensure consistency with the reference space
+#'   \item Projects the query sample into the aligned reference latent factor space
+#' }
+#'
+#' The function generates multiple outputs including:
+#' \itemize{
+#'   \item Quality control PDF with factor assignment and correlation heatmaps
+#'   \item 2D projection plots of all samples with the query sample highlighted
+#'   \item CSV files containing aligned latent factors and projection results
+#' }
 #'
 #' @name s3_plot_query_samples_mofa
 #'
@@ -28,8 +46,8 @@
 #'
 #' @param prefix Optional character prefix for all written files.
 #'
-#' @return Invisibly returns a data.frame of aggregated alignment metrics
-#'   across all processed models.
+#' @return Invisibly returns a data frame of alignment metrics
+#' for each reference axis. Output files (PDFs and CSVs) are written to output dir
 #'
 #' @export
 s3_plot_query_samples_mofa <- function(

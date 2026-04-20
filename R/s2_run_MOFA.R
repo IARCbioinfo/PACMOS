@@ -1,10 +1,19 @@
 #' Step 2: Train MOFA model for reference + query sample
 #'
+#' @description
 #' This function trains a MOFA2 model using the matrices generated in
 #' \code{s1_add_sample_to_mofa()}.
 #'
-#' The function loads the layer matrices, constructs a MOFA object,
+#' @details
+#' The function loads layer-specific `.RData` matrices, constructs a MOFA object,
 #' trains the model, and writes the resulting model to an HDF5 file.
+#'
+#' Each sample is processed independently. For each sample directory, the
+#' corresponding matrices are loaded, aligned across views, and used to train
+#' a MOFA model.
+#'
+#' If `skip_existing = TRUE`, samples for which a model file already exists
+#' will be skipped.
 #'
 #'
 #' @name s2_run_mofa
@@ -44,7 +53,8 @@
 #' @param binary_views Character vector specifying which views contain
 #' binary data (e.g. mutation or alteration layers).
 #'
-#' @return Invisibly returns TRUE when MOFA training completes.
+#' @return Invisibly returns TRUE when MOFA training completes. Trained MOFA models are
+#' written to disk as `.hdf5` files.
 #'
 #' @export
 s2_run_mofa <- function(
