@@ -29,9 +29,6 @@ You can install the development version of PACMOS from
 [GitHub](https://github.com/) with:
 
 ``` r
-#install.packages("BiocManager")
-BiocManager::install("MOFA2")
-
 # install.packages("devtools")
 devtools::install_github("lipikakalson/PACMOS", dependencies = TRUE)
 ```
