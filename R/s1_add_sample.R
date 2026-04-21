@@ -86,7 +86,7 @@ s1_add_sample_to_mofa <- function(query_matrix_path,
 
   rdata_files <- list.files(
     mofa_dir,
-    pattern = "*\\.RData$",
+    pattern = "\\.RData$",
     full.names = TRUE
   )
 
@@ -123,50 +123,42 @@ s1_add_sample_to_mofa <- function(query_matrix_path,
   }
 
 
-  # ---- Main processing loop --------------------------------------------------
+  # ---- read all query matrices first ----------------------------------------
+  query_matrices <- list()
+
   for (i in seq_along(query_matrix_path)) {
 
-    tm_path     <- query_matrix_path[i]
+    tm_path <- query_matrix_path[i]
     paired_type <- value_data_types[i]
 
     if (!file.exists(tm_path))
       stop("query matrix file does not exist: ", tm_path)
 
-
-    # ---- read query matrix ----------------------------------------------------
     query_matrix <- read.csv(
       tm_path,
       check.names = FALSE,
       stringsAsFactors = FALSE
     )
 
-
     if (ncol(query_matrix) < 2) {
-
       stop(
         "query matrix '", tm_path,
         "' must have 'gene_id' + at least one sample column."
       )
-
     }
-
 
     colnames(query_matrix)[1] <- "gene_id"
 
-
     if (!("gene_id" %in% colnames(query_matrix))) {
-
       stop(
         "query matrix '", tm_path,
         "' must contain a 'gene_id' column as the first column."
       )
-
     }
 
+    query_matrices[[paired_type]] <- query_matrix
 
-    # ---- identify sample columns --------------------------------------------
     sample_names <- setdiff(names(query_matrix), "gene_id")
-
 
     cat(
       "- Processing file #", i, ": ",
@@ -176,136 +168,128 @@ s1_add_sample_to_mofa <- function(query_matrix_path,
       "'\n",
       sep = ""
     )
+  }
 
 
-    # ---- iterate through each query sample -----------------------------------
-    for (sample_name in sample_names) {
-
-      mofa_inputs_current <- lapply(mofa_inputs_sample, function(x) x)
-
-      sample_dir <- file.path(outdir, sample_name)
-      inputs_dir <- file.path(sample_dir, "inputs")
-
-      dir.create(inputs_dir, recursive = TRUE, showWarnings = FALSE)
-
-      cat("\n==============================\n")
-      cat("Processing sample: ", sample_name, "\n")
-      cat("==============================\n")
-
-      sample_column <- query_matrix[, c("gene_id", sample_name)]
+  # ---- identify all sample columns across all query matrices ----------------
+  all_sample_names <- unique(unlist(
+    lapply(query_matrices, function(x) setdiff(names(x), "gene_id"))
+  ))
 
 
-      # ---- iterate through all MOFA layers ----------------------------------
-      for (data_type in names(mofa_inputs_sample)) {
+  # ---- iterate through each query sample ------------------------------------
+  for (sample_name in all_sample_names) {
 
-        mat <- as.data.frame(
-          mofa_inputs_sample[[data_type]],
-          check.names = FALSE
-        )
+    mofa_inputs_current <- lapply(mofa_inputs_sample, function(x) x)
 
+    sample_dir <- file.path(outdir, sample_name)
+    inputs_dir <- file.path(sample_dir, "inputs")
 
-        # ---- matching layer: insert real values -----------------------------
-        if (identical(data_type, paired_type)) {
+    dir.create(inputs_dir, recursive = TRUE, showWarnings = FALSE)
 
-          if (is.null(rownames(mat))) {
-
-            stop(
-              "MOFA object '",
-              data_type,
-              "' has no rownames to match against 'gene_id'."
-            )
-
-          }
+    cat("\n==============================\n")
+    cat("Processing sample: ", sample_name, "\n")
+    cat("==============================\n")
 
 
-          # align gene order
-          idx <- match(rownames(mat), sample_column$gene_id)
+    # ---- iterate through all MOFA layers ------------------------------------
+    for (data_type in names(mofa_inputs_sample)) {
 
-          matched   <- !is.na(idx)
-          n_total   <- nrow(mat)
-          n_match   <- sum(matched)
-          n_missing <- n_total - n_match
-
-
-          order_ok <- (n_missing == 0) &&
-            isTRUE(all(sample_column$gene_id[idx[!is.na(idx)]] == rownames(mat)[!is.na(idx)]))
+      mat <- as.data.frame(
+        mofa_inputs_sample[[data_type]],
+        check.names = FALSE
+      )
 
 
-          if (order_ok) {
+      # ---- matching layer: insert real values if provided -------------------
+      if (data_type %in% names(query_matrices) &&
+          sample_name %in% colnames(query_matrices[[data_type]])) {
 
-            cat(
-              "--[",
-              data_type,
-              " | ",
-              sample_name,
-              "] gene order OK (",
-              n_match,
-              "/",
-              n_total,
-              " matched)\n",
-              sep = ""
-            )
+        sample_column <- query_matrices[[data_type]][, c("gene_id", sample_name)]
 
-          } else {
+        if (is.null(rownames(mat))) {
+          stop(
+            "MOFA object '",
+            data_type,
+            "' has no rownames to match against 'gene_id'."
+          )
+        }
 
-            cat(
-              "-- [",
-              data_type,
-              " | ",
-              sample_name,
-              "] reordered to MOFA row order; ",
-              n_missing,
-              " genes missing in query (filled NA)\n",
-              sep = ""
-            )
+        # align gene order
+        idx <- match(rownames(mat), sample_column$gene_id)
 
-          }
+        matched   <- !is.na(idx)
+        n_total   <- nrow(mat)
+        n_match   <- sum(matched)
+        n_missing <- n_total - n_match
 
+        order_ok <- (n_missing == 0) &&
+          isTRUE(all(sample_column$gene_id[idx[!is.na(idx)]] == rownames(mat)[!is.na(idx)]))
 
-          mat[[sample_name]] <- sample_column[idx, sample_name]
+        if (order_ok) {
 
+          cat(
+            "--[",
+            data_type,
+            " | ",
+            sample_name,
+            "] gene order OK (",
+            n_match,
+            "/",
+            n_total,
+            " matched)\n",
+            sep = ""
+          )
 
         } else {
 
-          # ---- non-matching layers: add NA if column absent -----------------
-          if (!(sample_name %in% colnames(mat))) {
-
-            mat[[sample_name]] <- NA_real_
-
-          }
+          cat(
+            "-- [",
+            data_type,
+            " | ",
+            sample_name,
+            "] reordered to MOFA row order; ",
+            n_missing,
+            " genes missing in query (filled NA)\n",
+            sep = ""
+          )
 
         }
 
-        mofa_inputs_current[[data_type]] <- mat
+        mat[[sample_name]] <- sample_column[idx, sample_name]
 
-        # ---- save matrix -----------------------------------------------------
-        obj_to_save <- data_type
+      } else {
 
-        assign(obj_to_save, mat)
-
-        save(
-          list = obj_to_save,
-          file = file.path(
-            inputs_dir,
-            paste0(data_type, "_", sample_name, ".RData")
-
-          )
-        )
-
-        cat("   |_ Saved: ", data_type, "_", sample_name, ".RData\n", sep = "")
-
+        # ---- non-matching layers: add NA if column absent -------------------
+        if (!(sample_name %in% colnames(mat))) {
+          mat[[sample_name]] <- NA_real_
+        }
 
       }
 
+      mofa_inputs_current[[data_type]] <- mat
 
-      cat(
-        "\n Completed sample: ", sample_name,
-        " (file #", i, " paired with ", paired_type, ")\n\n",
-        sep = ""
+      # ---- save matrix -------------------------------------------------------
+      obj_to_save <- data_type
+
+      assign(obj_to_save, mat)
+
+      save(
+        list = obj_to_save,
+        file = file.path(
+          inputs_dir,
+          paste0(data_type, "_", sample_name, ".RData")
+        )
       )
 
+      cat("   |_ Saved: ", data_type, "_", sample_name, ".RData\n", sep = "")
     }
 
+    cat(
+      "\n Completed sample: ", sample_name,
+      "\n\n",
+      sep = ""
+    )
   }
 
 }
