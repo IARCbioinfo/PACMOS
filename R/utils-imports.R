@@ -3,6 +3,7 @@
 #' @importFrom stats ave cor kmeans setNames
 #' @importFrom utils combn read.csv write.csv
 #' @importFrom rlang .data
+#' @importFrom clue solve_LSAP
 NULL
 utils::globalVariables(c(
   "bio_label", "kmeans_cluster", "pct", "n",

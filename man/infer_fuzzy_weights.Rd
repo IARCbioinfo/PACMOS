@@ -9,6 +9,8 @@ infer_fuzzy_weights(
   matrices_subdir,
   coord,
   n_archetypes,
+  reference_axes = NULL,
+  input_type = c("stable", "retrained"),
   out_dir = file.path(models_dir, "archetype_weights"),
   prefix = ""
 )
@@ -25,6 +27,14 @@ infer_fuzzy_weights(
 \item{n_archetypes}{Integer. Expected number of archetypes. Validated
 against \code{nrow(coord)}.}
 
+\item{reference_axes}{Character vector. Latent factors column names (from reference)
+to use for weight inference. If \code{NULL}, all numeric columns are used.}
+
+\item{input_type}{Character. Which aligned matrix to use as input.
+Either \code{"stable"} (reference + query; from \code{_stable_input.csv})
+or \code{"retrained"} (all retrained model samples; from
+\code{_retrained_LFs_all_samples.csv}).}
+
 \item{out_dir}{Output directory for aggregated CSV. Defaults to
 \code{models_dir/archetype_weights/}.}
 
@@ -39,13 +49,12 @@ Computes archetype mixture weights for samples based on MOFA latent factors
 derived from Step 3 (`s3_plot_query_samples_mofa`).
 }
 \details{
-For each sample folder in `models_dir`, this function loads the
-`<sample_id>_stable_input.csv` produced by
-`s3_plot_query_samples_mofa()` and infers archetype mixture weights
-using constrained least squares.
+For each sample folder in `models_dir`, this function loads the aligned
+latent factor matrix produced by `s3_plot_query_samples_mofa()` —
+either `<sample_id>_stable_input.csv` or
+`<sample_id>_retrained_LFs_all_samples.csv` (controlled via `input_type`) —
+and infers archetype mixture weights using constrained least squares.
 
-Weights are computed for all samples in the `stable_input` matrix,
-including both reference and query samples.
 
 For each sample, two CSV files are written:
 \itemize{

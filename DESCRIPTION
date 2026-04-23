@@ -18,7 +18,8 @@ Imports:
     reticulate,
     rlang,
     scales,
-    Ternary
+    Ternary,
+    clue
 Suggests: 
     knitr, 
     rmarkdown

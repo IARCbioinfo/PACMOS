@@ -108,30 +108,6 @@ s3_plot_query_samples_mofa <- function(
   ref_mat <- as.matrix(ref_df[, reference_axes, drop = FALSE])
   rownames(ref_mat) <- ref_ids
 
-  # ---- greedy factor picker ------------------------------------------------
-  # Returns integer vector `pick` of length k:
-  # pick[j] = index of the new MOFA factor assigned to reference axis j.
-  # Each factor can only be assigned once.
-
-  .greedy_pick <- function(cor_mat, k) {
-
-    pick         <- rep(NA_integer_, k)
-    used_factors <- integer(0)
-
-    for (j in seq_len(k)) {
-      ord <- order(abs(cor_mat[, j]), decreasing = TRUE)
-      for (idx in ord) {
-        if (!(idx %in% used_factors)) {
-          pick[j]      <- idx
-          used_factors <- c(used_factors, idx)
-          break
-        }
-      }
-    }
-
-    pick
-  }
-
   # ---- alignment QC PDF ---------------------------------------------
 
   .write_alignment_QC_pdf <- function(
@@ -352,16 +328,25 @@ s3_plot_query_samples_mofa <- function(
       use = "pairwise.complete.obs"
     )
 
-    # -- greedy factor assignment --------------------------------------------
-    k    <- length(reference_axes)
-    pick <- .greedy_pick(cor_mat, k)
+    # -- factor assignment --------------------------------------------
 
-    if (any(is.na(pick))) {
-      message("  [SKIP] Could not uniquely assign all reference axes. Skipping.")
+    k      <- length(reference_axes)
+    cost_t <- t(1 - abs(cor_mat)^2)       # [k × n_factors]
+
+    assignment <- clue::solve_LSAP(cost_t)
+    pick       <- as.integer(assignment)
+    names(pick) <- reference_axes
+
+    r_chosen <- cor_mat[cbind(pick, seq_len(k))] # rows= retraiend, col = ref
+
+    if (any(is.na(pick)) || any(pick < 1) || any(pick > nrow(cor_mat))) {
+      message("  [SKIP] Invalid LSAP assignment for: ", sample_id)
       next
     }
-
-    names(pick) <- reference_axes
+    if (any(abs(r_chosen) < 0.3)) {
+      warning("Weak factor match (|r| < 0.3): ",
+              paste(reference_axes[abs(r_chosen) < 0.3], collapse = ", "))
+    }
 
     # -- build Zk: aligned factor matrix ---------------
     Zk           <- as.matrix(MOFA.LFs[, pick, drop = FALSE])

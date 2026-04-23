@@ -5,13 +5,12 @@
 #' derived from Step 3 (`s3_plot_query_samples_mofa`).
 #'
 #' @details
-#' For each sample folder in `models_dir`, this function loads the
-#' `<sample_id>_stable_input.csv` produced by
-#' `s3_plot_query_samples_mofa()` and infers archetype mixture weights
-#' using constrained least squares.
+#' For each sample folder in `models_dir`, this function loads the aligned
+#' latent factor matrix produced by `s3_plot_query_samples_mofa()` —
+#' either `<sample_id>_stable_input.csv` or
+#' `<sample_id>_retrained_LFs_all_samples.csv` (controlled via `input_type`) —
+#' and infers archetype mixture weights using constrained least squares.
 #'
-#' Weights are computed for all samples in the `stable_input` matrix,
-#' including both reference and query samples.
 #'
 #' For each sample, two CSV files are written:
 #' \itemize{
@@ -34,6 +33,14 @@
 #' @param n_archetypes    Integer. Expected number of archetypes. Validated
 #'   against \code{nrow(coord)}.
 #'
+#' @param input_type Character. Which aligned matrix to use as input.
+#'   Either \code{"stable"} (reference + query; from \code{_stable_input.csv})
+#'   or \code{"retrained"} (all retrained model samples; from
+#'   \code{_retrained_LFs_all_samples.csv}).
+#'
+#' @param reference_axes Character vector. Latent factors column names (from reference)
+#'   to use for weight inference. If \code{NULL}, all numeric columns are used.
+#'
 #' @param out_dir         Output directory for aggregated CSV. Defaults to
 #'   \code{models_dir/archetype_weights/}.
 #'
@@ -49,6 +56,8 @@ infer_fuzzy_weights <- function(
     matrices_subdir,
     coord,
     n_archetypes,
+    reference_axes = NULL,
+    input_type = c("stable", "retrained"),
     out_dir  = file.path(models_dir, "archetype_weights"),
     prefix   = ""
 ) {
@@ -108,10 +117,19 @@ infer_fuzzy_weights <- function(
   # ---- discover valid sample dirs ------------------------------------------
 
   sample_dirs <- list.dirs(models_dir, recursive = FALSE, full.names = TRUE)
+
+  input_type <- match.arg(input_type)
+
+  # map input_type to the correct file suffix
+  file_suffix <- switch(input_type,
+                        stable    = "_stable_input.csv",
+                        retrained = "_retrained_LFs_all_samples.csv"
+  )
+
   sample_dirs <- sample_dirs[
     file.exists(
       file.path(sample_dirs, matrices_subdir, "plots",
-                paste0(basename(sample_dirs), "_stable_input.csv"))
+                paste0(basename(sample_dirs), file_suffix))
     )
   ]
 
@@ -134,23 +152,52 @@ infer_fuzzy_weights <- function(
     message(sprintf("  [%d / %d]  %s", i, length(sample_dirs), sample_id))
     message(strrep("=", 45))
 
-    si_path <- file.path(sdir, matrices_subdir, "plots",
-                         paste0(sample_id, "_stable_input.csv"))
+    si_path <- file.path(
+      sdir, matrices_subdir, "plots",
+      paste0(sample_id, file_suffix)
+    )
 
-    stable_input <- read.csv(si_path, check.names = FALSE)
-    sid_col      <- stable_input[[1]]
+    input_df <- read.csv(si_path, check.names = FALSE)
+
+    if (!("Sample" %in% colnames(input_df))) {
+      stop("Column 'Sample' not found in: ", basename(si_path))
+    }
+
+    if (is.null(reference_axes)) {
+      numeric_cols <- vapply(input_df, is.numeric, logical(1))
+      numeric_cols["Sample"] <- FALSE
+      input_df <- input_df[, c("Sample", names(input_df)[numeric_cols]), drop = FALSE]
+    } else {
+      missing_axes <- setdiff(reference_axes, colnames(input_df))
+      if (length(missing_axes)) {
+        stop("reference_axes not found in ", basename(si_path), ": ",
+             paste(missing_axes, collapse = ", "))
+      }
+      input_df <- input_df[, c("Sample", reference_axes), drop = FALSE]
+    }
+
+    if ((ncol(input_df) - 1) != ncol(Z)) {
+      stop(
+        "Dimension mismatch in ", basename(si_path), ": input has ",
+        ncol(input_df) - 1, " feature(s) but coord expects ", ncol(Z),
+        ". Check reference_axes or coord."
+      )
+    }
+
+    sid_col <- input_df[["Sample"]]
 
     # ---- solve weights for ALL rows in stable_input ----------------------
 
-    all_rows_weights <- vector("list", nrow(stable_input))
+    all_rows_weights <- vector("list", nrow(input_df))
 
-    for (r in seq_len(nrow(stable_input))) {
+    for (r in seq_len(nrow(input_df))) {
 
       s_id <- sid_col[r]
-      x_r  <- as.numeric(stable_input[r, -1])
+      x_r  <- as.numeric(input_df[r, -1])
 
       if (length(x_r) != ncol(Z)) {
-        message("    [SKIP row] Dimension mismatch for: ", s_id)
+        message("    [SKIP row] Dimension mismatch for: ", s_id,
+                " (length=", length(x_r), ", expected=", ncol(Z), ")")
         next
       }
 
@@ -189,7 +236,8 @@ infer_fuzzy_weights <- function(
                                drop = FALSE]
 
     if (nrow(query_df) == 0) {
-      message("  [SKIP] '", sample_id, "' not found in stable_input rows.")
+      message("  [SKIP] '", sample_id, "' not found in ",
+              basename(si_path), " rows.")
       next
     }
 
