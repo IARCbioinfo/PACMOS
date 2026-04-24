@@ -56,7 +56,7 @@ where,
   <li>query_matrix_path =  Character vector of CSV file paths containing query sample matrices. First column is expected as gene_id, if not, first column is assumed as gene_id.</li>
   <li>mofa_dir          =  Character. Directory containing reference MOFA '.RData' matrices (e.g. 'D_expr_MOFA.RData', 'D_alt_MOFA.RData'). These objects must have rownames corresponding to gene IDs.</li>
   <li>value_data_types  = Character vector maping each query matrix to its corresponding reference MOFA data layer. Must be the same length as `query_matrix_path`. Each element should exactly match the name of a MOFA input object as it appears when the reference .RData files are loaded into R.</li>
-  <li>outdir            = Character. Root directory folder where output is stored.</li>
+  <li>outdir            = Character. Root directory folder where output will be stored.</li>
   <li>python_bin        = Path to the Python binary used by the MOFA environment via the `reticulate` package.</li>
 </ol>
 
@@ -65,7 +65,7 @@ This function trains a MOFA2 model using the matrices generated in `s1_add_sampl
 ```
 s2_run_mofa(
   models_dir,
-  matrices_subdir = "train_query_all_omics",
+  matrices_subdir = "inputs",
   num_factors = 10,
   convergence_mode = "slow",
   maxiter = 10000,
@@ -108,12 +108,12 @@ where,
   <li>matrices_subdir =  Folder name where `.hdf5` files are stored (`inputs` by default).</li>
   <li>query_sample    =  Sample ID of the query sample.</li>
   <li>reference_LFs   =  data.frame or path to CSV containing reference latent factors.</li>
-  <li>reference_axes  =  Character vector of reference axis column names we need to match and align.</li>
+  <li>reference_axes  =  Character vector of reference axis column names (Latent factors) we need to match and align.</li>
   <li>id_col          =  Character. Column name in \code{reference_LFs} that contains sample identifiers. These IDs must match the sample names used in the MOFA model. If NULL, the function uses the "Sample" column if present, otherwise the first column.</li>
-  <li>group          = MOFA group name (default \code{"group1"})</li>
+  <li>group           =  MOFA group name (default \code{"group1"})</li>
   <li>python_bin      =  Path to the Python binary used by the MOFA environment via the `reticulate` package.</li>
-  <li>plot_dir        = Output dir where the results are saved (default is `plots`)</li>
-  <li>prefix          = Character prefix for all written files.</li>
+  <li>plot_dir        =  Output dir where the results are saved (default is `plots`)</li>
+  <li>prefix          =  Character prefix for all written files.</li>
 </ol>
 
 ## FUZZY CLUSTERING
@@ -161,9 +161,11 @@ where,
 ### Step 5
 This function visualizes the archetype composition of query samples in the reference archetypal space based on the inferred fuzzy weights.
 ```
-PACMOS::plot_fuzzy_query_sample(
-  models_dir        = out_dir,
-  matrices_subdir   = "inputs"
+plot_fuzzy_query_sample(
+  models_dir,
+  matrices_subdir = "inputs",
+  sample_pattern = "",
+  prefix = ""
 )
 ```
 where,
@@ -178,42 +180,46 @@ where,
 ### Step 4
 This function assigns each query sample to a discrete cluster using k-means clustering in the latent factor space.
 ```
-PACMOS::infer_kmeans_labels(
-  models_dir      = out_dir",
-  matrices_subdir = "inputs",
-  k               = 4, # number of clusters
-  lf_cols         = c("LF1", "LF2", "LF3")
-)
+infer_kmeans_clusters(models_dir,
+                      matrices_subdir,
+                      k,
+                      lf_cols,
+                      prefix = "")
+
 
 ```
 where,
 <ol>
   <li>models_dir      =  Root directory folder. Same as `s1_add_sample_to_mofa() outdir`.</li>
-  <li>matrices_subdir =  Folder name where `.hdf5` files are stored (`inputs` by default).</li>
+  <li>matrices_subdir =  Character. Folder name where `.hdf5` files are stored (`inputs` by default).</li>
   <li>k               =  Number of k-means clusters.</li>
-  <li>lf_cols         =  LF columns to use as features for k-means.</li>
+  <li>lf_cols         =  Character vector specifying which latent factor columns to use as features for k-means clustering. These define the feature space for clustering and must exist in the input matrix.</li>
 </ol>
 
 ### Step 5
 This function visualizes the hard clustering results obtained from infer_kmeans_clusters().
 ```
-PACMOS::plot_kmeans_query_sample(
-    models_dir      = loo_root,
-    matrices_subdir = "train_test_Meth_only",
-    lf_cols         = c("Factor1", "Factor2", "Factor5"),
-    ref_labels_path = ref_file,
-    ref_cols        = c("sample", "bio_label"),
-    query_sample    = sid
-  )
+plot_kmeans_query_sample(
+  models_dir,
+  matrices_subdir = "inputs",
+  input_type = c("stable", "retrained"),
+  lf_cols,
+  ref_labels_path,
+  ref_cols,
+  sample_pattern = "",
+  prefix = ""
+)
 ```
 where,
 <ol>
-  <li>models_dir      =  Root folder. (out_dir) </li>
-  <li>matrices_subdir =  Folder name where `.RData` files are stored.</li>
-  <li>lf_cols         =  LF columns to use as features for k-means. (used for plotting) </li>
+  <li>models_dir      =  Root directory folder. Same as `s1_add_sample_to_mofa() outdir`.</li>
+  <li>matrices_subdir =  Character. Folder name where `.hdf5` files are stored (`inputs` by default).</li>
+  <li>input_type      =  Which aligned matrix to use as input. Either "stable" (reference + query; from `_stable_input.csv`) or "retrained" (all retrained model samples; from `_retrained_LFs_all_samples.csv`).</li>
+  <li>lf_cols         =  Character vector specifying which latent factor columns to visualize. These columns must exist in the aligned latent factor matrix and define the axes used for pairwise scatter plots. All pairwise combinations of lf_cols are plotted. </li>
   <li>ref_labels_path =  Path to CSV containing reference labels.
   <li>ref_cols        =  Character vector of length 2. Column names in the `ref_labels_path` CSV to use. E.g. c("sample", "bio_label")</li>
-  <li>query_sample    =  query_sample </li>
+  <li>sample_pattern   = Regex to filter sample folder names.</li>
+  <li>prefix           = Prefix for output PDF filenames.</li>
 </ol>
 
 ## Output directory structure
