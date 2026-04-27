@@ -4,10 +4,17 @@
 #' Visualizes k-means clustering results in latent factor (LF) space and
 #' maps clusters to known biological labels.
 #'
+#' NOTE:
+#' The value of \code{input_type} must match the one used in
+#' \code{infer_kmeans_clusters()}, otherwise cluster assignments and
+#' visualisation will be inconsistent.
+#'
 #' @details
 #' For each sample folder in `models_dir`, this function:
 #' \itemize{
-#'   \item Loads `<sample_id>_stable_input.csv` (latent factor coordinates)
+#'   \item Loads either `<sample_id>_stable_input.csv` or
+#'         `<sample_id>_retrained_LFs_all_samples.csv`
+#'         (controlled via `input_type`).
 #'   \item Loads `<sample_id>_sample_clusters.csv` (k-means cluster assignments)
 #'   \item Generates pairwise scatter plots for all combinations of `lf_cols`
 #'   \item Highlights the query sample in each plot
@@ -20,12 +27,18 @@
 #'
 #' @name plot_kmeans_query_sample
 #'
-#' @param models_dir      Character. Root directory.
+#' @param models_dir      Root directory folder. Same as `s1_add_sample_to_mofa() outdir`.
 #'
-#' @param matrices_subdir Character. Folder name where `.RData` files are stored..
+#' @param matrices_subdir Character. Folder name where `.hdf5` files are stored (`inputs` by default).
 #'
-#' @param lf_cols         Character vector. LF columns to use as features for k-means.
-#'   All pairwise combinations are plotted.
+#' @param input_type Character. Which aligned matrix to use as input.
+#'   Either \code{"stable"} (reference + query sample; recommended) or
+#'   \code{"retrained"} (retrained latent factors).
+#'
+#' @param lf_cols Character vector specifying which latent factor columns to visualize. These columns must exist in
+#'   the aligned latent factor matrix and define the
+#'   axes used for pairwise scatter plots. All pairwise combinations of
+#'   \code{lf_cols} are plotted.
 #'
 #' @param ref_labels_path Character. Path to CSV containing reference labels.
 #'
@@ -34,9 +47,9 @@
 #'   E.g. \code{c("sample", "bio_label")} or
 #'   \code{c("sample", "mapped_bio_label")}.
 #'
-#' @param sample_pattern    Character. Sample ID patterns.
+#' @param sample_pattern    Character. Regex to filter sample folder names.
 #'
-#' @param prefix          Optional character prefix for output files.
+#' @param prefix          Optional Prefix for output PDF filenames..
 #'
 #' @return Invisibly returns NULL.
 #'
@@ -44,7 +57,8 @@
 #' @export
 plot_kmeans_query_sample <- function(
     models_dir,
-    matrices_subdir,
+    matrices_subdir = "inputs",
+    input_type = c("stable", "retrained"),
     lf_cols,
     ref_labels_path,
     ref_cols,
@@ -70,6 +84,13 @@ plot_kmeans_query_sample <- function(
     stop("Package 'ggplot2' is required. Please install it.")
 
   # ---- load ref_labels -----------------------------------------------------
+
+  input_type <- match.arg(input_type)
+
+  file_suffix <- switch(input_type,
+                        stable    = "_stable_input.csv",
+                        retrained = "_retrained_LFs_all_samples.csv"
+  )
 
   ref_raw <- read.csv(ref_labels_path, check.names = FALSE,
                       stringsAsFactors = FALSE)
@@ -123,18 +144,19 @@ plot_kmeans_query_sample <- function(
     }
 
 
-    si_path <- file.path(out_dir, paste0(sample_id, "_stable_input.csv"))
+    si_path <- file.path(out_dir, paste0(sample_id, file_suffix))
+
     if (!file.exists(si_path)) {
-      warning("  stable_input not found, skipping: ", sample_id); next
+      warning("  Input matrix not found (", input_type, "), skipping: ", sample_id)
+      next
     }
 
+    input_df <- read.csv(si_path, check.names = FALSE,
+                         stringsAsFactors = FALSE)
 
-    stable_input <- read.csv(si_path, check.names = FALSE,
-                             stringsAsFactors = FALSE)
-
-    missing_lf <- setdiff(lf_cols, colnames(stable_input))
+    missing_lf <- setdiff(lf_cols, colnames(input_df))
     if (length(missing_lf))
-      stop("  Missing LF columns in stable_input: ",
+      stop("  Missing LF columns in input matrix: ",
            paste(missing_lf, collapse = ", "))
 
 
@@ -152,8 +174,11 @@ plot_kmeans_query_sample <- function(
 
     # ---- merge LF coords + cluster assignments -------------------------------
 
-    plot_df              <- stable_input[, c(colnames(stable_input)[1],
-                                             lf_cols), drop = FALSE]
+    if (!("Sample" %in% colnames(input_df))) {
+      stop("Column 'Sample' not found in: ", basename(si_path))
+    }
+
+    plot_df <- input_df[, c("Sample", lf_cols), drop = FALSE]
     colnames(plot_df)[1] <- "sample"
     plot_df              <- merge(plot_df, cluster_df, by = "sample")
     plot_df$is_query     <- plot_df$sample == sample_id

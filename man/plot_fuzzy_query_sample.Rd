@@ -6,15 +6,15 @@
 \usage{
 plot_fuzzy_query_sample(
   models_dir,
-  matrices_subdir,
+  matrices_subdir = "inputs",
   sample_pattern = "",
   prefix = ""
 )
 }
 \arguments{
-\item{models_dir}{Character. Root directory.}
+\item{models_dir}{Character. Root directory folder. Same as `s1_add_sample_to_mofa() outdir`.}
 
-\item{matrices_subdir}{Character. Folder name where `.RData` files are stored.}
+\item{matrices_subdir}{Character. Folder name where `.hdf5` files are stored (`inputs` by default).}
 
 \item{sample_pattern}{Regex to filter sample folder names. Default \code{""} (all).}
 

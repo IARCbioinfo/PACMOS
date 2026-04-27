@@ -22,9 +22,9 @@
 #'
 #' @name infer_fuzzy_weights
 #'
-#' @param models_dir      Character. Root directory
+#' @param models_dir      Character. Root directory folder. Same as `s1_add_sample_to_mofa() outdir`.
 #'
-#' @param matrices_subdir Character. Folder name where `.RData` files are stored.
+#' @param matrices_subdir Character. Folder name where `.hdf5` files are stored (`inputs` by default).
 #'
 #' @param coord           data.frame of archetype coordinates. Either:
 #'   (A) first column = archetype names, remaining columns = coordinates, or
@@ -38,8 +38,11 @@
 #'   or \code{"retrained"} (all retrained model samples; from
 #'   \code{_retrained_LFs_all_samples.csv}).
 #'
-#' @param reference_axes Character vector. Latent factors column names (from reference)
-#'   to use for weight inference. If \code{NULL}, all numeric columns are used.
+#' @param reference_axes Character vector specifying which latent factor
+#'   columns (e.g. "Factor1", "Factor2") to use for archetype weight inference.
+#'   These must match column names in the input matrices and correspond to the
+#'   same dimensions used to define the archetype coordinates in \code{coord}.
+#'   If \code{NULL}, all numeric latent factor columns are used.
 #'
 #' @param out_dir         Output directory for aggregated CSV. Defaults to
 #'   \code{models_dir/archetype_weights/}.
@@ -47,7 +50,7 @@
 #' @param prefix          Optional character prefix for output files.
 #'
 #' @return Invisibly returns a data.frame with columns
-#'   \code{Sample} + one column per archetype (query samples only).
+#'   \code{Sample} + one column per archetype.
 #'
 #'
 #' @export
@@ -144,121 +147,128 @@ infer_fuzzy_weights <- function(
 
   for (i in seq_along(sample_dirs)) {
 
-    sdir      <- sample_dirs[i]
-    sample_id <- basename(sdir)
+    tryCatch(
+      {
+        sdir      <- sample_dirs[i]
+        sample_id <- basename(sdir)
 
-    message("")
-    message(strrep("=", 45))
-    message(sprintf("  [%d / %d]  %s", i, length(sample_dirs), sample_id))
-    message(strrep("=", 45))
+        message("")
+        message(strrep("=", 45))
+        message(sprintf("  [%d / %d]  %s", i, length(sample_dirs), sample_id))
+        message(strrep("=", 45))
 
-    si_path <- file.path(
-      sdir, matrices_subdir, "plots",
-      paste0(sample_id, file_suffix)
-    )
+        si_path <- file.path(
+          sdir, matrices_subdir, "plots",
+          paste0(sample_id, file_suffix)
+        )
 
-    input_df <- read.csv(si_path, check.names = FALSE)
+        input_df <- read.csv(si_path, check.names = FALSE)
 
-    if (!("Sample" %in% colnames(input_df))) {
-      stop("Column 'Sample' not found in: ", basename(si_path))
-    }
-
-    if (is.null(reference_axes)) {
-      numeric_cols <- vapply(input_df, is.numeric, logical(1))
-      numeric_cols["Sample"] <- FALSE
-      input_df <- input_df[, c("Sample", names(input_df)[numeric_cols]), drop = FALSE]
-    } else {
-      missing_axes <- setdiff(reference_axes, colnames(input_df))
-      if (length(missing_axes)) {
-        stop("reference_axes not found in ", basename(si_path), ": ",
-             paste(missing_axes, collapse = ", "))
-      }
-      input_df <- input_df[, c("Sample", reference_axes), drop = FALSE]
-    }
-
-    if ((ncol(input_df) - 1) != ncol(Z)) {
-      stop(
-        "Dimension mismatch in ", basename(si_path), ": input has ",
-        ncol(input_df) - 1, " feature(s) but coord expects ", ncol(Z),
-        ". Check reference_axes or coord."
-      )
-    }
-
-    sid_col <- input_df[["Sample"]]
-
-    # ---- solve weights for ALL rows in stable_input ----------------------
-
-    all_rows_weights <- vector("list", nrow(input_df))
-
-    for (r in seq_len(nrow(input_df))) {
-
-      s_id <- sid_col[r]
-      x_r  <- as.numeric(input_df[r, -1])
-
-      if (length(x_r) != ncol(Z)) {
-        message("    [SKIP row] Dimension mismatch for: ", s_id,
-                " (length=", length(x_r), ", expected=", ncol(Z), ")")
-        next
-      }
-
-      alpha_r <- tryCatch(
-        .solve_weights(x_r, Z_t, k, archetype_names),
-        error = function(e) {
-          message("    [SKIP row] Solver error for '", s_id, "': ",
-                  conditionMessage(e))
-          NULL
+        if (!("Sample" %in% colnames(input_df))) {
+          stop("Column 'Sample' not found in: ", basename(si_path))
         }
-      )
 
-      if (is.null(alpha_r)) next
+        if (is.null(reference_axes)) {
+          numeric_cols <- vapply(input_df, is.numeric, logical(1))
+          numeric_cols["Sample"] <- FALSE
+          input_df <- input_df[, c("Sample", names(input_df)[numeric_cols]), drop = FALSE]
+        } else {
+          missing_axes <- setdiff(reference_axes, colnames(input_df))
+          if (length(missing_axes)) {
+            stop("reference_axes not found in ", basename(si_path), ": ",
+                 paste(missing_axes, collapse = ", "))
+          }
+          input_df <- input_df[, c("Sample", reference_axes), drop = FALSE]
+        }
 
-      row_df <- as.data.frame(t(c(Sample = s_id, alpha_r)),
-                              stringsAsFactors = FALSE)
-      for (col in archetype_names)
-        row_df[[col]] <- as.numeric(row_df[[col]])
+        if ((ncol(input_df) - 1) != ncol(Z)) {
+          stop(
+            "Dimension mismatch in ", basename(si_path), ": input has ",
+            ncol(input_df) - 1, " feature(s) but coord expects ", ncol(Z),
+            ". Check reference_axes or coord."
+          )
+        }
 
-      all_rows_weights[[r]] <- row_df
-    }
+        sid_col <- input_df[["Sample"]]
 
-    all_samples_df <- do.call(rbind,
-                              Filter(Negate(is.null), all_rows_weights))
+        # ---- solve weights for ALL rows in stable_input ----------------------
 
-    if (is.null(all_samples_df) || nrow(all_samples_df) == 0) {
-      message("  [SKIP] No weights computed for any sample in: ", sample_id)
-      next
-    }
+        all_rows_weights <- vector("list", nrow(input_df))
 
-    sample_plot_dir <- file.path(sdir, matrices_subdir, "plots")
+        for (r in seq_len(nrow(input_df))) {
 
-    # ---- CSV 1: query sample only ----------------------------------------
+          s_id <- sid_col[r]
+          x_r  <- as.numeric(input_df[r, -1])
 
-    query_df <- all_samples_df[all_samples_df$Sample == sample_id, ,
-                               drop = FALSE]
+          if (length(x_r) != ncol(Z)) {
+            message("    [SKIP row] Dimension mismatch for: ", s_id,
+                    " (length=", length(x_r), ", expected=", ncol(Z), ")")
+            next
+          }
 
-    if (nrow(query_df) == 0) {
-      message("  [SKIP] '", sample_id, "' not found in ",
-              basename(si_path), " rows.")
-      next
-    }
+          alpha_r <- tryCatch(
+            .solve_weights(x_r, Z_t, k, archetype_names),
+            error = function(e) {
+              message("    [SKIP row] Solver error for '", s_id, "': ",
+                      conditionMessage(e))
+              NULL
+            }
+          )
 
-    sample_csv <- file.path(sample_plot_dir,
-                            paste0(prefix, sample_id,
-                                   "_archetype_weights.csv"))
-    write.csv(query_df, sample_csv, row.names = FALSE)
-    message("  Saved (query only) : ", basename(sample_csv))
+          if (is.null(alpha_r)) next
 
-    # ---- CSV 2: all samples in stable_input ------------------------------
+          row_df <- as.data.frame(t(c(Sample = s_id, alpha_r)),
+                                  stringsAsFactors = FALSE)
+          for (col in archetype_names)
+            row_df[[col]] <- as.numeric(row_df[[col]])
 
-    all_csv <- file.path(sample_plot_dir,
-                         paste0(prefix, sample_id,
-                                "_archetype_weights_all_samples.csv"))
-    write.csv(all_samples_df, all_csv, row.names = FALSE)
-    message("  Saved (all samples): ", basename(all_csv))
+          all_rows_weights[[r]] <- row_df
+        }
 
-    # store query row for aggregation
-    all_weights[[i]] <- c(Sample = sample_id,
-                          setNames(as.numeric(query_df[, archetype_names]),
-                                   archetype_names))
+        all_samples_df <- do.call(rbind,
+                                  Filter(Negate(is.null), all_rows_weights))
+
+        if (is.null(all_samples_df) || nrow(all_samples_df) == 0) {
+          message("  [SKIP] No weights computed for any sample in: ", sample_id)
+          next
+        }
+
+        sample_plot_dir <- file.path(sdir, matrices_subdir, "plots")
+
+        # ---- CSV 1: query sample only ----------------------------------------
+
+        query_df <- all_samples_df[all_samples_df$Sample == sample_id, ,
+                                   drop = FALSE]
+
+        if (nrow(query_df) == 0) {
+          message("  [SKIP] '", sample_id, "' not found in ",
+                  basename(si_path), " rows.")
+          next
+        }
+
+        sample_csv <- file.path(sample_plot_dir,
+                                paste0(sample_id,
+                                       "_archetype_weights.csv"))
+        write.csv(query_df, sample_csv, row.names = FALSE)
+        message("  Saved (query only) : ", basename(sample_csv))
+
+        # ---- CSV 2: all samples in stable_input ------------------------------
+
+        all_csv <- file.path(sample_plot_dir,
+                             paste0(sample_id,
+                                    "_archetype_weights_all_samples.csv"))
+        write.csv(all_samples_df, all_csv, row.names = FALSE)
+        message("  Saved (all samples): ", basename(all_csv))
+
+        # store query row for aggregation
+        all_weights[[i]] <- c(Sample = sample_id,
+                              setNames(as.numeric(query_df[, archetype_names]),
+                                       archetype_names))
+      }, error = function(e) {
+        warning("Error in sample ", basename(sample_dirs[i]), ": ",
+                conditionMessage(e))
+      })
+
   }
 
   # ---- aggregated CSV (query rows only) ------------------------------------
@@ -274,7 +284,7 @@ infer_fuzzy_weights <- function(
     results_df[[col]] <- as.numeric(results_df[[col]])
 
   agg_csv <- file.path(out_dir,
-                       paste0(prefix, matrices_subdir,
+                       paste0(prefix,
                               "_archetype_weights.csv"))
   write.csv(results_df, agg_csv, row.names = FALSE)
 

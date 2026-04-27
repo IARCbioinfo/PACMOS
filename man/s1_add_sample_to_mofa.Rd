@@ -14,18 +14,18 @@ s1_add_sample_to_mofa(
 }
 \arguments{
 \item{query_matrix_path}{Character vector of CSV file paths containing query
-sample matrices.}
+sample matrices. First column is expected as gene_id, if not first column is
+assumed as gene_id/feature_id (depending on the omic type).}
 
 \item{mofa_dir}{Character. Directory containing reference MOFA `.RData`
 matrices (e.g. `D_expr_MOFA.RData`, `D_alt_MOFA.RData`). These objects must
-have rownames corresponding to gene IDs.}
+have rownames corresponding to gene IDs/feature_ids (depending on the omic type).}
 
-\item{value_data_types}{Character vector of MOFA object names indicating
-which layer each query matrix corresponds to. Must be the same length as
-`query_matrix_path`.}
+\item{value_data_types}{Character vector maping each query matrix to its corresponding reference MOFA data layer.
+Must be the same length as `query_matrix_path`. Each element should exactly match the name of a MOFA input object
+as it appears when the reference .RData files are loaded into R.}
 
-\item{outdir}{Character. Directory where updated `.RData` matrices will be
-written.}
+\item{outdir}{Character. Root directory where output will be stored.}
 
 \item{python_bin}{Character. Path to the Python binary used by the MOFA
 environment via the `reticulate` package.}

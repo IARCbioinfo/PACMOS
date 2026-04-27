@@ -23,10 +23,9 @@
 #'
 #' @name s3_plot_query_samples_mofa
 #'
-#' @param models_dir Character. Root folder containing output of
-#' `s2_run_MOFA()`.
+#' @param models_dir Root directory folder. Same as `s1_add_sample_to_mofa() outdir`.
 #'
-#' @param matrices_subdir Folder name where `.hdf5` files are stored.
+#' @param matrices_subdir Folder name where `.hdf5` files are stored (`inputs` by default).
 #'
 #' @param query_sample Character. Sample ID of the query sample.
 #'
@@ -35,12 +34,15 @@
 #'
 #' @param reference_axes Character vector of reference axis column names (latent factors) we need to match and align.
 #'
-#' @param id_col Column name for sample IDs in \code{reference_LFs}.
-#'   If NULL, uses "Sample" if present, otherwise the first column.
+#' @param id_col Character. Column name in \code{reference_LFs} that contains
+#'   sample identifiers. These IDs must match the sample names used in the
+#'   MOFA model. If \code{NULL}, the function uses the \code{"Sample"} column
+#'   if present, otherwise the first column.
 #'
 #' @param group MOFA group name (default \code{"group1"}).
 #'
-#' @param python_bin Path to Python binary for \code{reticulate}.
+#' @param python_bin Path to the Python binary used by the MOFA
+#' environment via the `reticulate` package.
 #'
 #' @param plot_dir Output directory. Defaults to \code{models_dir/plots}.
 #'
@@ -52,7 +54,7 @@
 #' @export
 s3_plot_query_samples_mofa <- function(
     models_dir,
-    matrices_subdir,
+    matrices_subdir = "inputs",
     query_sample,
     reference_LFs,
     reference_axes,
@@ -365,8 +367,8 @@ s3_plot_query_samples_mofa <- function(
       Zk[query_sample, , drop = FALSE]
     )
 
-    message("  Stable input     : ", nrow(stable_input), " samples x ",
-            ncol(stable_input), " axes")
+    #message("  Stable input     : ", nrow(stable_input), " samples x ",
+    #        ncol(stable_input), " axes")
     message("  Writing outputs to: ", plot_dir)
 
     # -- alignment QC PDF + metrics ------------------------------------------

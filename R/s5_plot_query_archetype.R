@@ -22,8 +22,8 @@
 #'
 #' @name plot_fuzzy_query_sample
 #'
-#' @param models_dir        Character. Root directory.
-#' @param matrices_subdir Character. Folder name where `.RData` files are stored.
+#' @param models_dir      Character. Root directory folder. Same as `s1_add_sample_to_mofa() outdir`.
+#' @param matrices_subdir Character. Folder name where `.hdf5` files are stored (`inputs` by default).
 #' @param sample_pattern  Regex to filter sample folder names. Default \code{""} (all).
 #' @param prefix          Optional prefix for output PDF filenames.
 #'
@@ -34,7 +34,7 @@
 #' @export
 plot_fuzzy_query_sample <- function(
     models_dir,
-    matrices_subdir ,
+    matrices_subdir = "inputs",
     sample_pattern   = "",
     prefix           = ""
 ) {

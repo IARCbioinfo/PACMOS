@@ -6,7 +6,8 @@
 \usage{
 plot_kmeans_query_sample(
   models_dir,
-  matrices_subdir,
+  matrices_subdir = "inputs",
+  input_type = c("stable", "retrained"),
   lf_cols,
   ref_labels_path,
   ref_cols,
@@ -15,12 +16,18 @@ plot_kmeans_query_sample(
 )
 }
 \arguments{
-\item{models_dir}{Character. Root directory.}
+\item{models_dir}{Root directory folder. Same as `s1_add_sample_to_mofa() outdir`.}
 
-\item{matrices_subdir}{Character. Folder name where `.RData` files are stored..}
+\item{matrices_subdir}{Character. Folder name where `.hdf5` files are stored (`inputs` by default).}
 
-\item{lf_cols}{Character vector. LF columns to use as features for k-means.
-All pairwise combinations are plotted.}
+\item{input_type}{Character. Which aligned matrix to use as input.
+Either \code{"stable"} (reference + query sample; recommended) or
+\code{"retrained"} (retrained latent factors).}
+
+\item{lf_cols}{Character vector specifying which latent factor columns to visualize. These columns must exist in
+the aligned latent factor matrix and define the
+axes used for pairwise scatter plots. All pairwise combinations of
+\code{lf_cols} are plotted.}
 
 \item{ref_labels_path}{Character. Path to CSV containing reference labels.}
 
@@ -29,9 +36,9 @@ All pairwise combinations are plotted.}
 E.g. \code{c("sample", "bio_label")} or
 \code{c("sample", "mapped_bio_label")}.}
 
-\item{sample_pattern}{Character. Sample ID patterns.}
+\item{sample_pattern}{Character. Regex to filter sample folder names.}
 
-\item{prefix}{Optional character prefix for output files.}
+\item{prefix}{Optional Prefix for output PDF filenames..}
 }
 \value{
 Invisibly returns NULL.
@@ -39,11 +46,18 @@ Invisibly returns NULL.
 \description{
 Visualizes k-means clustering results in latent factor (LF) space and
 maps clusters to known biological labels.
+
+NOTE:
+The value of \code{input_type} must match the one used in
+\code{infer_kmeans_clusters()}, otherwise cluster assignments and
+visualisation will be inconsistent.
 }
 \details{
 For each sample folder in `models_dir`, this function:
 \itemize{
-  \item Loads `<sample_id>_stable_input.csv` (latent factor coordinates)
+  \item Loads either `<sample_id>_stable_input.csv` or
+        `<sample_id>_retrained_LFs_all_samples.csv`
+        (controlled via `input_type`).
   \item Loads `<sample_id>_sample_clusters.csv` (k-means cluster assignments)
   \item Generates pairwise scatter plots for all combinations of `lf_cols`
   \item Highlights the query sample in each plot

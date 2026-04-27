@@ -6,7 +6,7 @@
 \usage{
 s3_plot_query_samples_mofa(
   models_dir,
-  matrices_subdir,
+  matrices_subdir = "inputs",
   query_sample,
   reference_LFs,
   reference_axes,
@@ -18,10 +18,9 @@ s3_plot_query_samples_mofa(
 )
 }
 \arguments{
-\item{models_dir}{Character. Root folder containing output of
-`s2_run_MOFA()`.}
+\item{models_dir}{Root directory folder. Same as `s1_add_sample_to_mofa() outdir`.}
 
-\item{matrices_subdir}{Folder name where `.hdf5` files are stored.}
+\item{matrices_subdir}{Folder name where `.hdf5` files are stored (`inputs` by default).}
 
 \item{query_sample}{Character. Sample ID of the query sample.}
 
@@ -30,12 +29,15 @@ factors. Must contain \code{id_col} and all \code{reference_axes} columns.}
 
 \item{reference_axes}{Character vector of reference axis column names (latent factors) we need to match and align.}
 
-\item{id_col}{Column name for sample IDs in \code{reference_LFs}.
-If NULL, uses "Sample" if present, otherwise the first column.}
+\item{id_col}{Character. Column name in \code{reference_LFs} that contains
+sample identifiers. These IDs must match the sample names used in the
+MOFA model. If \code{NULL}, the function uses the \code{"Sample"} column
+if present, otherwise the first column.}
 
 \item{group}{MOFA group name (default \code{"group1"}).}
 
-\item{python_bin}{Path to Python binary for \code{reticulate}.}
+\item{python_bin}{Path to the Python binary used by the MOFA
+environment via the `reticulate` package.}
 
 \item{plot_dir}{Output directory. Defaults to \code{models_dir/plots}.}
 

@@ -16,9 +16,9 @@ infer_fuzzy_weights(
 )
 }
 \arguments{
-\item{models_dir}{Character. Root directory}
+\item{models_dir}{Character. Root directory folder. Same as `s1_add_sample_to_mofa() outdir`.}
 
-\item{matrices_subdir}{Character. Folder name where `.RData` files are stored.}
+\item{matrices_subdir}{Character. Folder name where `.hdf5` files are stored (`inputs` by default).}
 
 \item{coord}{data.frame of archetype coordinates. Either:
 (A) first column = archetype names, remaining columns = coordinates, or
@@ -27,8 +27,11 @@ infer_fuzzy_weights(
 \item{n_archetypes}{Integer. Expected number of archetypes. Validated
 against \code{nrow(coord)}.}
 
-\item{reference_axes}{Character vector. Latent factors column names (from reference)
-to use for weight inference. If \code{NULL}, all numeric columns are used.}
+\item{reference_axes}{Character vector specifying which latent factor
+columns (e.g. "Factor1", "Factor2") to use for archetype weight inference.
+These must match column names in the input matrices and correspond to the
+same dimensions used to define the archetype coordinates in \code{coord}.
+If \code{NULL}, all numeric latent factor columns are used.}
 
 \item{input_type}{Character. Which aligned matrix to use as input.
 Either \code{"stable"} (reference + query; from \code{_stable_input.csv})
@@ -42,7 +45,7 @@ or \code{"retrained"} (all retrained model samples; from
 }
 \value{
 Invisibly returns a data.frame with columns
-  \code{Sample} + one column per archetype (query samples only).
+  \code{Sample} + one column per archetype.
 }
 \description{
 Computes archetype mixture weights for samples based on MOFA latent factors

@@ -21,18 +21,18 @@
 #' @name s1_add_sample_to_mofa
 #'
 #' @param query_matrix_path Character vector of CSV file paths containing query
-#' sample matrices.
+#' sample matrices. First column is expected as gene_id, if not first column is
+#' assumed as gene_id/feature_id (depending on the omic type).
 #'
 #' @param mofa_dir Character. Directory containing reference MOFA `.RData`
 #' matrices (e.g. `D_expr_MOFA.RData`, `D_alt_MOFA.RData`). These objects must
-#' have rownames corresponding to gene IDs.
+#' have rownames corresponding to gene IDs/feature_ids (depending on the omic type).
 #'
-#' @param value_data_types Character vector of MOFA object names indicating
-#' which layer each query matrix corresponds to. Must be the same length as
-#' `query_matrix_path`.
+#' @param value_data_types Character vector maping each query matrix to its corresponding reference MOFA data layer.
+#' Must be the same length as `query_matrix_path`. Each element should exactly match the name of a MOFA input object
+#' as it appears when the reference .RData files are loaded into R.
 #'
-#' @param outdir Character. Directory where updated `.RData` matrices will be
-#' written.
+#' @param outdir Character. Root directory where output will be stored.
 #'
 #' @param python_bin Character. Path to the Python binary used by the MOFA
 #' environment via the `reticulate` package.
@@ -147,12 +147,23 @@ s1_add_sample_to_mofa <- function(query_matrix_path,
       )
     }
 
-    colnames(query_matrix)[1] <- "gene_id"
+    # ---- detect gene_id column --------------------------------------------
 
-    if (!("gene_id" %in% colnames(query_matrix))) {
-      stop(
-        "query matrix '", tm_path,
-        "' must contain a 'gene_id' column as the first column."
+    if ("gene_id" %in% colnames(query_matrix)) {
+
+      # ensure it's first column
+      query_matrix <- query_matrix[, c("gene_id",
+                                       setdiff(colnames(query_matrix), "gene_id")),
+                                   drop = FALSE]
+
+    } else {
+
+      # fallback: assume first column is gene_id
+      colnames(query_matrix)[1] <- "gene_id"
+
+      warning(
+        "Column 'gene_id' not found in '", basename(tm_path),
+        "'. Assuming first column is gene_id."
       )
     }
 

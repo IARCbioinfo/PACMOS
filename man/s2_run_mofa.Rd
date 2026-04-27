@@ -6,7 +6,7 @@
 \usage{
 s2_run_mofa(
   models_dir,
-  matrices_subdir = "train_query_all_omics",
+  matrices_subdir = "inputs",
   num_factors = 10,
   convergence_mode = "slow",
   maxiter = 10000,
@@ -19,10 +19,9 @@ s2_run_mofa(
 )
 }
 \arguments{
-\item{models_dir}{Root folder containing `.RData` matrices created by
-`s1_add_sample_to_mofa()`.}
+\item{models_dir}{RRoot directory folder. Same as `s1_add_sample_to_mofa() outdir`..}
 
-\item{matrices_subdir}{Folder name where `.RData` files are stored.}
+\item{matrices_subdir}{Folder name where `.RData` files are stored. (`inputs` by default)}
 
 \item{num_factors}{Integer. Number of latent factors.}
 
@@ -35,12 +34,14 @@ s2_run_mofa(
 \item{skip_existing}{Logical. If TRUE, skip samples for which output
 HDF5 already exists.}
 
-\item{python_bin}{Path to the Python executable used by MOFA.}
+\item{python_bin}{Path to the Python binary used by the MOFA
+environment via the `reticulate` package.}
 
 \item{outfile_prefix}{Optional prefix for output files.}
 
-\item{views_map}{Named character vector mapping view names to matrix
-object names.
+\item{views_map}{Named character vector mapping MOFA view names to the corresponding matrix object names
+loaded from `.RData` files. Names define the view labels (e.g. "RNA"), and values specify the matrix objects
+(e.g. "D_expr_MOFA"). The view names are only labels and do not affect the analysis.
 
 Example:
 \preformatted{
