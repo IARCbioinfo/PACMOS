@@ -1,11 +1,11 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^\.github$
+^\.github($|/)
 ^README\.Rmd$
 ^LICENSE\.md$
-^doc$
+^doc($|/)
 ^Meta$
 ^PACMOS\.BiocCheck$
 ^README\.html$
-^docs$
+^docs($|/)
 ^mofa_env\.yml$

@@ -18,11 +18,11 @@ Imports:
     reticulate,
     rlang,
     scales,
-    Ternary,
-    clue
+    clue,
+    Ternary
 Suggests: 
     knitr, 
-    rmarkdown
+    rmarkdown,
 SystemRequirements: Python (>= 3.8), mofapy2
 Depends:
     R (>= 4.2)
