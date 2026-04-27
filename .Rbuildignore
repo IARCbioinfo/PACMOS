@@ -5,3 +5,7 @@
 ^LICENSE\.md$
 ^doc$
 ^Meta$
+^PACMOS\.BiocCheck$
+^README\.html$
+^docs$
+^mofa_env\.yml$
