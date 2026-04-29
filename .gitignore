@@ -1,20 +1,21 @@
-# Ignore logs
+# Logs
 logs/
 */logs/
-PACMOS.BiocCheck/
 
-# Ignore outputs
+# Outputs
 *.out
 *.err
-
-# Ignore analysis
-Analysis_010426/
 
 # R stuff
 .Rhistory
 .Rproj.user/
-/Meta/
 .RData
 *.RData
+
+# BiocCheck
 PACMOS.BiocCheck/
-*.RData
+
+# ---- Docs control ----
+
+# Ignore heavy files inside docs
+docs/**/*.hdf5

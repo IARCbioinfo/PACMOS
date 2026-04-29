@@ -2,10 +2,13 @@
 ^\.Rproj\.user$
 ^\.github($|/)
 ^README\.Rmd$
+^README\.html$
 ^LICENSE\.md$
-^doc($|/)
 ^Meta$
 ^PACMOS\.BiocCheck$
-^README\.html$
+^doc($|/)
 ^docs($|/)
 ^mofa_env\.yml$
+
+# Exclude HDF5
+\.hdf5$
