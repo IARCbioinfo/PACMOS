@@ -238,11 +238,20 @@ where,
           query_sample__retrained_LFs_all_samples.csv
           query_sample__stable_input.csv
 
-          #--Step 4 output--
+          # FUZZY
+          #--Step 4 output-- 
           query_sample_archetype_weights_all_samples.csv
           query_sample__archetype_weights.csv
 
           #--Step5 output--
           query_sample__archetype_projection.pdf
 
+          # HARD
+          #--Step 4 output--
+          query_sample_sample_clusters.csv
+
+          #--Step 5 output-- 
+          query_sample_kmeans_cluster.pdf
+          query_sample_cluster_label_map.csv
+          query_sample_kmeans_heatmap.csv
 ```
