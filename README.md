@@ -30,7 +30,7 @@ You can install the development version of PACMOS from
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("lipikakalson/PACMOS", dependencies = TRUE)
+devtools::install_github("IARCbioinfo/PACMOS", dependencies = TRUE)
 ```
 
 ## Tutorial
