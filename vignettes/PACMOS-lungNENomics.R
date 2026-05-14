@@ -4,6 +4,12 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 
+## ----eval=FALSE---------------------------------------------------------------
+#  Sys.setenv(
+#    PACMOS_PYTHON =
+#      "C:/Users/YOUR_USERNAME/miniconda3/envs/pacmos_env/python.exe"
+#  )
+
 ## ----install, eval=FALSE------------------------------------------------------
 #  # install.packages("devtools")
 #  devtools::install_github("IARCbioinfo/PACMOS", dependencies = TRUE)
@@ -22,8 +28,14 @@ dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 out_dir
 
 
-Sys.setenv(PACMOS_PYTHON = "/home/lipikal/miniconda3/envs/pacmos_env/bin/python") #replace this with your 'which python' output
-python_path <- Sys.getenv("PACMOS_PYTHON", unset = NA)
+python_path <- Sys.getenv("PACMOS_PYTHON")
+
+if (!file.exists(python_path)) {
+  stop(
+    "PACMOS_PYTHON is not set correctly.\n",
+    "Activate pacmos_env and set PACMOS_PYTHON to your conda python path."
+  )
+}
 
 ## ----run-step1, results='markup', warning=FALSE-------------------------------
 

@@ -56,13 +56,30 @@ cd PACMOS
 conda env create -f pacmos_env.yml
 conda activate pacmos_env
 
-# Linux/macOS
-which python
-# For example: /home/user/miniconda3/envs/pacmos_env/bin/python
+# Linux/macOS users:
+export PACMOS_PYTHON=$(which python)
+echo $PACMOS_PYTHON
+```
 
-# Windows
+For Windows, open the **Anaconda Prompt** and run:
+```{bash, eval=FALSE}
+conda activate pacmos_env
 where python
-#C:\Users\lipikal\AppData\Local\miniconda3\envs\pacmos_env\python.exe
+```
+
+This will return a path similar to:
+
+```text
+C:\Users\YOUR_USERNAME\miniconda3\envs\pacmos_env\python.exe
+```
+
+Then in R run:
+
+```{r, eval=FALSE}
+Sys.setenv(
+  PACMOS_PYTHON =
+    "C:/Users/YOUR_USERNAME/miniconda3/envs/pacmos_env/python.exe"
+)
 ```
 
 ```{r install, eval=FALSE}
@@ -86,8 +103,14 @@ dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 out_dir
 
 
-Sys.setenv(PACMOS_PYTHON = "/home/lipikal/miniconda3/envs/pacmos_env/bin/python") #replace this with your 'which python' output
-python_path <- Sys.getenv("PACMOS_PYTHON", unset = NA)
+python_path <- Sys.getenv("PACMOS_PYTHON")
+
+if (!file.exists(python_path)) {
+  stop(
+    "PACMOS_PYTHON is not set correctly.\n",
+    "Activate pacmos_env and set PACMOS_PYTHON to your conda python path."
+  )
+}
 ```
 
 ## Step 1: Add query samples to MOFA inputs
