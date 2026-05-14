@@ -57,7 +57,8 @@
 #'
 #' @examples
 #' mofa_dir <- system.file("extdata/MESOMICS_references", package = "PACMOS")
-#' reference_LFs <- system.file("extdata/MESOMICS_references", "MESOMICS_latent_factors.csv", package = "PACMOS")
+#' reference_LFs <- system.file("extdata/MESOMICS_references",
+#'                             "MESOMICS_latent_factors.csv", package = "PACMOS")
 #' query_csv <- system.file("extdata/test_data", "MESOMICS_test_expr.csv", package = "PACMOS")
 #' out_dir <- file.path(tempdir(), "pacmos_s3")
 #' dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
