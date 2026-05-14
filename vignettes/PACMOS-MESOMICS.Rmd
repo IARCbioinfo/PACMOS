@@ -60,9 +60,16 @@ export PACMOS_PYTHON=$(which python)
 echo $PACMOS_PYTHON
 ```
 
-For Windows, open the **Anaconda Prompt** and run:
+For Windows, download the PACMOS repository as a ZIP file from https://github.com/IARCbioinfo/PACMOS. Extract the ZIP archive, then open the **Anaconda Prompt** and run:
+
 ```{bash, eval=FALSE}
+cd <dir-to-PACMOS>\PACMOS-main
+
+dir
+
+conda env create -f pacmos_env.yml
 conda activate pacmos_env
+
 where python
 ```
 
