@@ -12,7 +12,7 @@ s2_run_mofa(
   maxiter = 10000,
   use_basilisk = FALSE,
   skip_existing = TRUE,
-  python_bin,
+  python_bin = NULL,
   outfile_prefix = "",
   views_map,
   binary_views = NULL
@@ -84,7 +84,7 @@ s1_add_sample_to_mofa(
   mofa_dir = mofa_dir,
   value_data_types = "D_exprB_MOFA",
   outdir = out_dir,
-  python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python")
+  python_bin = Sys.getenv("PACMOS_PYTHON", unset = "")
 )
 
 s2_run_mofa(
@@ -95,7 +95,7 @@ s2_run_mofa(
   maxiter = 5,
   use_basilisk = FALSE,
   skip_existing = TRUE,
-  python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python"),
+  python_bin = Sys.getenv("PACMOS_PYTHON", unset = ""),
   views_map = c(RNA = "D_exprB_MOFA"),
   binary_views = NULL
 )

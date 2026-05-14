@@ -12,7 +12,7 @@ s3_plot_query_samples_mofa(
   reference_axes,
   id_col = NULL,
   group = "group1",
-  python_bin,
+  python_bin = NULL,
   output_dir = NULL,
   prefix = ""
 )
@@ -84,7 +84,7 @@ s1_add_sample_to_mofa(
   mofa_dir = mofa_dir,
   value_data_types = "D_exprB_MOFA",
   outdir = out_dir,
-  python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python")
+  python_bin = Sys.getenv("PACMOS_PYTHON", unset = "")
 )
 
 s2_run_mofa(
@@ -92,8 +92,8 @@ s2_run_mofa(
   matrices_subdir = "inputs",
   num_factors = 2,
   maxiter = 5,
-  python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python"),
-  views_map = c(RNA = "D_exprB_MOFA"),
+  python_bin = Sys.getenv("PACMOS_PYTHON", unset = ""),
+  views_map = c(RNA = "D_exprB_MOFA")
 )
 
 sample_id <- basename(list.dirs(out_dir, recursive = FALSE, full.names = TRUE)[1])
@@ -104,7 +104,7 @@ s3_plot_query_samples_mofa(
   query_sample = sample_id,
   reference_LFs = reference_LFs,
   reference_axes = c("Morphology_LF", "Adaptive-response_LF"),
-  python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python")
+  python_bin = Sys.getenv("PACMOS_PYTHON", unset = "")
 )
 
 }

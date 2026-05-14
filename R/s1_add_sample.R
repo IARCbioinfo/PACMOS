@@ -51,7 +51,7 @@
 #'   mofa_dir = mofa_dir,
 #'   value_data_types = "D_exprB_MOFA",
 #'   outdir = out_dir,
-#'   python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python")
+#'   python_bin = Sys.getenv("PACMOS_PYTHON", unset = "")
 #' )
 #'
 #' @export
@@ -59,14 +59,23 @@ s1_add_sample_to_mofa <- function(query_matrix_path,
                                   mofa_dir = system.file("extdata/", package = "PACMOS"),
                                   value_data_types = NULL,
                                   outdir = "output/",
-                                  python_bin) {
+                                  python_bin = NULL) {
 
   # ---- dependency check ------------------------------------------------------
-  if (!requireNamespace("reticulate", quietly = TRUE))
-    stop("Package 'reticulate' is required.")
+  if (!requireNamespace("reticulate", quietly = TRUE)) {
+    stop("Package 'reticulate' is required.", call. = FALSE)
+  }
 
-  reticulate::use_python(python_bin, required = TRUE)
+  if (!is.null(python_bin) &&
+      length(python_bin) == 1L &&
+      nzchar(python_bin)) {
 
+    if (!file.exists(python_bin)) {
+      stop("python_bin does not exist: ", python_bin, call. = FALSE)
+    }
+
+    reticulate::use_python(python_bin, required = TRUE)
+  }
 
   # ---- ensure correct input types -------------------------------------------
   query_matrix_path <- as.character(query_matrix_path)

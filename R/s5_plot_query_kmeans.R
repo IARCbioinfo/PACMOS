@@ -71,7 +71,7 @@
 #'   mofa_dir = mofa_dir,
 #'   value_data_types = "D_exprB_MOFA",
 #'   outdir = out_dir,
-#'   python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python")
+#'   python_bin = Sys.getenv("PACMOS_PYTHON", unset = "")
 #' )
 #'
 #' s2_run_mofa(
@@ -82,7 +82,7 @@
 #'   maxiter = 5,
 #'   use_basilisk = FALSE,
 #'   skip_existing = TRUE,
-#'   python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python"),
+#'   python_bin = Sys.getenv("PACMOS_PYTHON", unset = ""),
 #'   views_map = c(RNA = "D_exprB_MOFA"),
 #'   binary_views = NULL
 #' )
@@ -96,7 +96,7 @@
 #'   reference_LFs = reference_LFs,
 #'   reference_axes = c("Morphology_LF", "Adaptive-response_LF"),
 #'   group = "group1",
-#'   python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python")
+#'   python_bin = Sys.getenv("PACMOS_PYTHON", unset = "")
 #' )
 #'
 #' infer_kmeans_clusters(
@@ -129,7 +129,6 @@
 #'   ref_labels_path = ref_labels_path,
 #'   ref_cols = c("sample", "bio_label")
 #' )
-#'
 #'
 #' @export
 plot_kmeans_query_sample <- function(

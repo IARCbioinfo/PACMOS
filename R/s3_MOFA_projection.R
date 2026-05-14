@@ -67,7 +67,7 @@
 #'   mofa_dir = mofa_dir,
 #'   value_data_types = "D_exprB_MOFA",
 #'   outdir = out_dir,
-#'   python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python")
+#'   python_bin = Sys.getenv("PACMOS_PYTHON", unset = "")
 #' )
 #'
 #' s2_run_mofa(
@@ -75,8 +75,8 @@
 #'   matrices_subdir = "inputs",
 #'   num_factors = 2,
 #'   maxiter = 5,
-#'   python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python"),
-#'   views_map = c(RNA = "D_exprB_MOFA"),
+#'   python_bin = Sys.getenv("PACMOS_PYTHON", unset = ""),
+#'   views_map = c(RNA = "D_exprB_MOFA")
 #' )
 #'
 #' sample_id <- basename(list.dirs(out_dir, recursive = FALSE, full.names = TRUE)[1])
@@ -87,7 +87,7 @@
 #'   query_sample = sample_id,
 #'   reference_LFs = reference_LFs,
 #'   reference_axes = c("Morphology_LF", "Adaptive-response_LF"),
-#'   python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python")
+#'   python_bin = Sys.getenv("PACMOS_PYTHON", unset = "")
 #' )
 #'
 #' @export
@@ -99,10 +99,26 @@ s3_plot_query_samples_mofa <- function(
     reference_axes,
     id_col       = NULL,
     group        = "group1",
-    python_bin,
+    python_bin   = NULL,
     output_dir= NULL,
     prefix       = ""
 ) {
+
+  # ---- dependency check ------------------------------------------------------
+  if (!requireNamespace("reticulate", quietly = TRUE)) {
+    stop("Package 'reticulate' is required.", call. = FALSE)
+  }
+
+  if (!is.null(python_bin) &&
+      length(python_bin) == 1L &&
+      nzchar(python_bin)) {
+
+    if (!file.exists(python_bin)) {
+      stop("python_bin does not exist: ", python_bin, call. = FALSE)
+    }
+
+    reticulate::use_python(python_bin, required = TRUE)
+  }
 
   # ---- input checks --------------------------------------------------------
 
@@ -112,8 +128,6 @@ s3_plot_query_samples_mofa <- function(
   if (missing(query_sample) || is.null(query_sample) ||
       !nzchar(query_sample))
     stop("query_sample must be provided (LOO query sample ID).")
-
-  reticulate::use_python(python_bin, required = TRUE)
 
   if (length(reference_axes) < 2)
     stop("At least two reference_axes are required.")

@@ -9,7 +9,7 @@ s1_add_sample_to_mofa(
   mofa_dir = system.file("extdata/", package = "PACMOS"),
   value_data_types = NULL,
   outdir = "output/",
-  python_bin
+  python_bin = NULL
 )
 }
 \arguments{
@@ -61,7 +61,7 @@ s1_add_sample_to_mofa(
   mofa_dir = mofa_dir,
   value_data_types = "D_exprB_MOFA",
   outdir = out_dir,
-  python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python")
+  python_bin = Sys.getenv("PACMOS_PYTHON", unset = "")
 )
 
 }

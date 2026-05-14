@@ -44,20 +44,27 @@ jobs:
           activate-environment: pacmos_env
           auto-activate-base: false
 
-      - name: Set PACMOS_PYTHON on Linux/macOS
+      - name: Set PACMOS Python on Linux/macOS
         if: runner.os != 'Windows'
         shell: bash -l {0}
         run: |
-          echo "PACMOS_PYTHON=$CONDA_PREFIX/bin/python" >> $GITHUB_ENV
-          which python
+          PYTHON_PATH=$(python -c "import sys; print(sys.executable)")
+          echo "PACMOS_PYTHON=$PYTHON_PATH" >> "$GITHUB_ENV"
+          echo "RETICULATE_PYTHON=$PYTHON_PATH" >> "$GITHUB_ENV"
+
+          echo "Using Python: $PYTHON_PATH"
           python -c "import mofapy2, numpy, pandas, sklearn; print('Python OK')"
 
-      - name: Set PACMOS_PYTHON on Windows
+
+      - name: Set PACMOS Python on Windows
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          echo "PACMOS_PYTHON=$env:CONDA_PREFIX\python.exe" >> $env:GITHUB_ENV
-          where.exe python
+          $pythonPath = python -c "import sys; print(sys.executable)"
+          echo "PACMOS_PYTHON=$pythonPath" >> $env:GITHUB_ENV
+          echo "RETICULATE_PYTHON=$pythonPath" >> $env:GITHUB_ENV
+
+          Write-Host "Using Python: $pythonPath"
           python -c "import mofapy2, numpy, pandas, sklearn; print('Python OK')"
 
 

@@ -67,7 +67,7 @@
 #'   mofa_dir = mofa_dir,
 #'   value_data_types = "D_exprB_MOFA",
 #'   outdir = out_dir,
-#'   python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python")
+#'   python_bin = Sys.getenv("PACMOS_PYTHON", unset = "")
 #' )
 #'
 #' s2_run_mofa(
@@ -78,7 +78,7 @@
 #'   maxiter = 5,
 #'   use_basilisk = FALSE,
 #'   skip_existing = TRUE,
-#'   python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python"),
+#'   python_bin = Sys.getenv("PACMOS_PYTHON", unset = ""),
 #'   views_map = c(RNA = "D_exprB_MOFA"),
 #'   binary_views = NULL
 #' )
@@ -93,7 +93,7 @@ s2_run_mofa <- function(
     maxiter          = 10000,
     use_basilisk     = FALSE,
     skip_existing    = TRUE,
-    python_bin,
+    python_bin       = NULL,
     outfile_prefix   = "",
     views_map,
     binary_views     = NULL
@@ -105,10 +105,20 @@ s2_run_mofa <- function(
 
 
   # ---- dependency check ------------------------------------------------------
-  if (!requireNamespace("reticulate", quietly = TRUE))
-    stop("Package 'reticulate' is required.")
+  if (!requireNamespace("reticulate", quietly = TRUE)) {
+    stop("Package 'reticulate' is required.", call. = FALSE)
+  }
 
-  reticulate::use_python(python_bin, required = TRUE)
+  if (!is.null(python_bin) &&
+      length(python_bin) == 1L &&
+      nzchar(python_bin)) {
+
+    if (!file.exists(python_bin)) {
+      stop("python_bin does not exist: ", python_bin, call. = FALSE)
+    }
+
+    reticulate::use_python(python_bin, required = TRUE)
+  }
 
   if (is.null(views_map) || is.null(names(views_map)))
     stop("views_map must be a named character vector")
