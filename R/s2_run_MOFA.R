@@ -57,6 +57,32 @@
 #' @return Invisibly returns TRUE when MOFA training completes. Trained MOFA models are
 #' written to disk as `.hdf5` files.
 #'
+#' @examples
+#' mofa_dir <- system.file("extdata/MESOMICS_references", package = "PACMOS")
+#' query_csv <- system.file("extdata/test_data", "MESOMICS_test_expr.csv", package = "PACMOS")
+#' out_dir <- file.path(tempdir(), "pacmos_s2")
+#' dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+#' s1_add_sample_to_mofa(
+#'   query_matrix_path = query_csv,
+#'   mofa_dir = mofa_dir,
+#'   value_data_types = "D_exprB_MOFA",
+#'   outdir = out_dir,
+#'   python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python")
+#' )
+#'
+#' s2_run_mofa(
+#'   models_dir = out_dir,
+#'   matrices_subdir = "inputs",
+#'   num_factors = 2,
+#'   convergence_mode = "fast",
+#'   maxiter = 5,
+#'   use_basilisk = FALSE,
+#'   skip_existing = TRUE,
+#'   python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python"),
+#'   views_map = c(RNA = "D_exprB_MOFA"),
+#'   binary_views = NULL
+#' )
+#'
 #'
 #' @export
 s2_run_mofa <- function(

@@ -2,10 +2,11 @@
 title: "PACMOS-lungNEN-fuzzy-tutorial"
 output:
   rmarkdown::html_vignette:
-    toc: true
+  toc: true
+  toc_depth: 2
 self_contained: true
 vignette: >
-  %\VignetteIndexEntry{PACMOS-lungNEN-fuzzy-tutorial}
+  %\VignetteIndexEntry{2. PACMOS-lungNENomics-fuzzy-tutorial}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -31,31 +32,43 @@ div.sourceCode {
 
 ```
 
-# Overview
+# Introduction
 
 This vignette shows how to:
 
+0. Installation of PACMOS.
 1. Add a query sample to MOFA reference inputs,
 2. Run MOFA2,
 3. Project query sample into reference MOFA space,
 4. Infer archetype weights of query sample,
 5. Plot query sample onto Pareto archetype space.
 
-## Step 0: Set Up Python Environment
+## Step 0: Installation
 
-Before using MESOMICS, make sure you have the required Python environment.
+Before using lungNENomics, make sure you have the required Python environment.
 
-Open your terminal and run:
+For Linux/macOS, open a terminal.  
+For Windows, open the **Anaconda Prompt** and run:
 
 ```{bash, eval=FALSE}
 git clone https://github.com/IARCbioinfo/PACMOS.git
 cd PACMOS
 conda env create -f pacmos_env.yml
-conda activate pacmos-env
+conda activate pacmos_env
+
+# Linux/macOS
 which python
-# For example: /home/user/miniconda3/envs/mofa_env/bin/python
+# For example: /home/user/miniconda3/envs/pacmos_env/bin/python
+
+# Windows
+where python
+#C:\Users\lipikal\AppData\Local\miniconda3\envs\pacmos_env\python.exe
 ```
 
+```{r install, eval=FALSE}
+# install.packages("devtools")
+devtools::install_github("IARCbioinfo/PACMOS", dependencies = TRUE)
+```
 
 ```{r setup}
 library(PACMOS)
@@ -72,8 +85,9 @@ out_dir <- file.path('.', "lungNEN_output")
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 out_dir
 
-Sys.setenv(MOFA_PYTHON = "/home/lipikal/miniconda3/envs/mofa_env/bin/python") #replace this with your 'which python' output
-python_path <- Sys.getenv("MOFA_PYTHON", unset = NA)
+
+Sys.setenv(PACMOS_PYTHON = "/home/lipikal/miniconda3/envs/pacmos_env/bin/python") #replace this with your 'which python' output
+python_path <- Sys.getenv("PACMOS_PYTHON", unset = NA)
 ```
 
 ## Step 1: Add query samples to MOFA inputs
@@ -126,17 +140,21 @@ cat("Outputs are saved in:", out_dir, "\n")
 ```
 
 ## Step 3: Visualize query samples
-This function projects query samples into the reference latent factor space and generates quality control visualizations. It compares the learned latent factors of retrained models with reference axes, computes correlations, and produces diagnostic plots to assess how well the query samples align with known biological structure.
+This function projects query samples into the reference/retrained latent factor space and generates quality control visualizations. It compares the learned latent factors of retrained models with reference axes, computes correlations, and produces diagnostic plots to assess how well the query samples align with known biological structure.
 
-The outputs are saved as PDF files for each sample in the `plots` directory inside `inputs`.
+The outputs are saved as PDF files for each sample in the `outputs` directory inside each query sample folder.
 
 ```{r run-step3,warning=FALSE}
 print('Starting Step 3')
 
-sample_ids <- list.files(out_dir)
+sample_dirs <- list.dirs(out_dir, recursive = FALSE, full.names = TRUE)
+sample_dirs <- sample_dirs[dir.exists(file.path(sample_dirs, "inputs"))]
+sample_ids <- basename(sample_dirs)
+
+s3_results <- list()
 
 for (id in sample_ids) {
-  PACMOS::s3_plot_query_samples_mofa(
+  s3_results[[id]] <- PACMOS::s3_plot_query_samples_mofa(
     models_dir      = out_dir,
     matrices_subdir = "inputs",
     query_sample    = id,
@@ -154,10 +172,37 @@ cat("Outputs are saved in:", out_dir, "\n")
 
 ```
 
+### Interpreting Step 3 quality control
+
+Step 3 checks whether the latent factors learned after adding the query sample can be aligned back to the original reference MOFA space.
+
+The QC PDF contains three main diagnostics (Good alignment is indicated by high absolute correlation, a clear diagonal trend in the scatter plot, and relatively low RMSE):
+
+1. **Factor assignment summary**: shows which retrained MOFA factor was matched to each reference latent factor.
+
+2. **Correlation heatmap**: The heatmap shows correlations between retrained MOFA factors and reference latent factors. Rows are retrained MOFA factors and columns are reference axes. The black boundary marks the selected factor for each reference axis.
+
+```{r step3-qc-heatmap, fig.width=7, fig.height=5}
+sample_to_show <- sample_ids[1]
+
+s3_results[[sample_to_show]]$plots$alignment_heatmap
+```
+
+3. **Scatter plots**: The scatter plot compares reference LF values with aligned retrained LF values. A strong diagonal trend and high correlation indicate successful alignment.
+```{r step3-qc-scatter, fig.width=6, fig.height=5}
+s3_results[[sample_to_show]]$plots$scatter_by_axis$Factor1
+```
+
+
+The projection plot shows the query sample highlighted in red within the reference latent factor space (grey points).
+```{r step3-projection, fig.width=6, fig.height=5}
+s3_results[[sample_to_show]]$plots$projection_pairs[[1]]
+```
+
 ## Step 4: Infer archetype weights
 This function estimates the contribution of predefined biological archetypes to each query sample using a fuzzy weighting approach. Based on the latent factor coordinates obtained from MOFA, it calculates the degree to which each sample belongs to each archetype.
 
-The result is saved as a csv file in the `plots` directory.
+The result is saved as a csv file in the `outputs` directory.
 
 ```{r run-step4, warning=FALSE}
 print('Starting Step 4')
@@ -172,7 +217,6 @@ archetype_coords <- data.frame(
 
 PACMOS::infer_fuzzy_weights(
   models_dir      = out_dir,
-  matrices_subdir = "inputs",
   coord           = archetype_coords,
   n_archetypes    = 4,
   input_type      = "stable"
@@ -184,15 +228,25 @@ cat("Outputs are saved in:", out_dir, "\n")
 ## Step 5: Plot results
 This function visualizes the archetype composition of query samples based on the inferred fuzzy weights.
 
-The plot is saved as a pdf file in the `plots` directory.
-
 ```{r run-step5, warning=FALSE}
 print('Starting Step 5')
 
-PACMOS::plot_fuzzy_query_sample(
-  models_dir      = out_dir,
-  matrices_subdir = "inputs"
+fuzzy_results <- PACMOS::plot_fuzzy_query_sample(
+  models_dir      = out_dir
 )
 cat("Outputs are saved in:", out_dir, "\n")
 
+```
+```{r s5-ternary, fig.width=20, fig.height=80,out.width="700px"}
+sample_to_show <- sample_ids[1]
+
+knitr::include_graphics(
+  fuzzy_results$samples[[sample_to_show]]$files$projection_pdf
+)
+```
+
+## Session information
+
+```{r session-info}
+sessionInfo()
 ```

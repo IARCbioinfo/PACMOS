@@ -6,7 +6,6 @@
 \usage{
 plot_kmeans_query_sample(
   models_dir,
-  matrices_subdir = "inputs",
   input_type = c("stable", "retrained"),
   lf_cols,
   ref_labels_path,
@@ -17,8 +16,6 @@ plot_kmeans_query_sample(
 }
 \arguments{
 \item{models_dir}{Root directory folder. Same as `s1_add_sample_to_mofa() outdir`.}
-
-\item{matrices_subdir}{Character. Folder name where `.hdf5` files are stored (`inputs` by default).}
 
 \item{input_type}{Character. Which aligned matrix to use as input.
 Either \code{"stable"} (reference + query sample; recommended) or
@@ -67,4 +64,85 @@ For each sample folder in `models_dir`, this function:
   \item Saves a cluster-to-label mapping CSV
   \item Saves a heatmap showing cluster vs biological label composition
 }
+}
+\examples{
+mofa_dir <- system.file("extdata/MESOMICS_references", package = "PACMOS")
+reference_LFs <- system.file(
+  "extdata/MESOMICS_references",
+  "MESOMICS_latent_factors.csv",
+  package = "PACMOS"
+)
+query_csv <- system.file(
+  "extdata/test_data",
+  "MESOMICS_test_expr.csv",
+  package = "PACMOS"
+)
+out_dir <- file.path(tempdir(), "pacmos_s5")
+dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+
+s1_add_sample_to_mofa(
+  query_matrix_path = query_csv,
+  mofa_dir = mofa_dir,
+  value_data_types = "D_exprB_MOFA",
+  outdir = out_dir,
+  python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python")
+)
+
+s2_run_mofa(
+  models_dir = out_dir,
+  matrices_subdir = "inputs",
+  num_factors = 2,
+  convergence_mode = "fast",
+  maxiter = 5,
+  use_basilisk = FALSE,
+  skip_existing = TRUE,
+  python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python"),
+  views_map = c(RNA = "D_exprB_MOFA"),
+  binary_views = NULL
+)
+
+sample_id <- basename(list.dirs(out_dir, recursive = FALSE, full.names = TRUE)[1])
+
+s3_plot_query_samples_mofa(
+  models_dir = out_dir,
+  matrices_subdir = "inputs",
+  query_sample = sample_id,
+  reference_LFs = reference_LFs,
+  reference_axes = c("Morphology_LF", "Adaptive-response_LF"),
+  group = "group1",
+  python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python")
+)
+
+infer_kmeans_clusters(
+  models_dir = out_dir,
+  k = 3,
+  input_type = "stable",
+  lf_cols = c("Morphology_LF", "Adaptive-response_LF")
+)
+
+# create a fake simple reference label mapping
+
+stable_path <- file.path(out_dir, sample_id, "outputs", paste0(sample_id, "_stable_input.csv"))
+ref_df <- read.csv(stable_path, check.names = FALSE)
+ref_labels <- data.frame(
+  sample = ref_df$Sample,
+  bio_label = ifelse(
+    ref_df$Morphology_LF > median(ref_df$Morphology_LF, na.rm = TRUE),
+    "High-Morphology",
+    "Low-Morphology"
+  ),
+  stringsAsFactors = FALSE
+)
+ref_labels_path <- file.path(out_dir, "ref_labels.csv")
+write.csv(ref_labels, ref_labels_path, row.names = FALSE)
+
+plot_kmeans_query_sample(
+  models_dir = out_dir,
+  input_type = "stable",
+  lf_cols = c("Morphology_LF", "Adaptive-response_LF"),
+  ref_labels_path = ref_labels_path,
+  ref_cols = c("sample", "bio_label")
+)
+
+
 }

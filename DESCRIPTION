@@ -12,13 +12,17 @@ Encoding: UTF-8
 RoxygenNote: 7.2.3
 VignetteBuilder: knitr
 Imports: 
+    clue,
     ggplot2,
+    grDevices,
+    graphics,
     limSolve,
     MOFA2,
     reticulate,
     rlang,
     scales,
-    clue
+    stats,
+    utils
 Suggests: 
     knitr, 
     rmarkdown,
@@ -26,4 +30,4 @@ Suggests:
 SystemRequirements: Python (>= 3.8), mofapy2
 Depends:
     R (>= 4.2)
-biocViews: MultiOmics, Clustering
+biocViews: DimensionReduction, Clustering, Visualization

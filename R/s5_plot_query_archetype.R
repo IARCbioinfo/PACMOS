@@ -18,23 +18,89 @@
 #' If the number of archetypes exceeds three, multiple ternary panels are
 #' generated for all combinations of three archetypes.
 #'
-#' Output PDFs are saved alongside the input CSV files in the `plots/` directory.
+#' Output PDFs are saved alongside the input CSV files in the `outputs/` directory.
 #'
 #' @name plot_fuzzy_query_sample
 #'
 #' @param models_dir      Character. Root directory folder. Same as `s1_add_sample_to_mofa() outdir`.
-#' @param matrices_subdir Character. Folder name where `.hdf5` files are stored (`inputs` by default).
 #' @param sample_pattern  Regex to filter sample folder names. Default \code{""} (all).
 #' @param prefix          Optional prefix for output PDF filenames.
 #'
-#' @return Invisibly returns a named logical vector (sample processed = TRUE).
+#' @return Invisibly returns a list with:
+#' \itemize{
+#'   \item \code{processed}: named logical vector indicating processed samples.
+#'   \item \code{samples}: nested list containing output PDF file paths.
+#' }
+#'
+#' @examples
+#' mofa_dir <- system.file("extdata/MESOMICS_references", package = "PACMOS")
+#' reference_LFs <- system.file(
+#'   "extdata/MESOMICS_references",
+#'   "MESOMICS_latent_factors.csv",
+#'   package = "PACMOS"
+#' )
+#' query_csv <- system.file(
+#'   "extdata/test_data",
+#'   "MESOMICS_test_expr.csv",
+#'   package = "PACMOS"
+#' )
+#' out_dir <- file.path(tempdir(), "pacmos_s5")
+#' dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+#'
+#' s1_add_sample_to_mofa(
+#'   query_matrix_path = query_csv,
+#'   mofa_dir = mofa_dir,
+#'   value_data_types = "D_exprB_MOFA",
+#'   outdir = out_dir,
+#'   python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python")
+#' )
+#'
+#' s2_run_mofa(
+#'   models_dir = out_dir,
+#'   matrices_subdir = "inputs",
+#'   num_factors = 2,
+#'   convergence_mode = "fast",
+#'   maxiter = 5,
+#'   use_basilisk = FALSE,
+#'   skip_existing = TRUE,
+#'   python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python"),
+#'   views_map = c(RNA = "D_exprB_MOFA"),
+#'   binary_views = NULL
+#' )
+#'
+#' sample_id <- basename(list.dirs(out_dir, recursive = FALSE, full.names = TRUE)[1])
+#'
+#' s3_plot_query_samples_mofa(
+#'   models_dir = out_dir,
+#'   matrices_subdir = "inputs",
+#'   query_sample = sample_id,
+#'   reference_LFs = reference_LFs,
+#'   reference_axes = c("Morphology_LF", "Adaptive-response_LF"),
+#'   group = "group1",
+#'   python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python")
+#' )
+#' archetype_coords <- data.frame(
+#'   Archetype = c("Cell division", "Tumor-immune-interaction", "Acinar"),
+#'   Morphology_LF = c(-3.5973, -1.7981, 3.8586),
+#'   `Adaptive-response_LF` = c(-2.3960, 3.5635, -0.8256),
+#'   stringsAsFactors = FALSE
+#' )
+#'
+#' infer_fuzzy_weights(
+#'   models_dir = out_dir,
+#'   coord = archetype_coords,
+#'   n_archetypes = 3,
+#'   reference_axes = c("Morphology_LF", "Adaptive-response_LF"),
+#'   input_type = "stable"
+#' )
+#'
+#' plot_fuzzy_query_sample(models_dir = out_dir)
 #'
 #'
 #'
 #' @export
 plot_fuzzy_query_sample <- function(
     models_dir,
-    matrices_subdir = "inputs",
     sample_pattern   = "",
     prefix           = ""
 ) {
@@ -71,7 +137,7 @@ plot_fuzzy_query_sample <- function(
       axis.col         = "black",
       ticks.col        = "black",
       axis.rotate      = FALSE,
-      padding          = 0.12
+      padding          = 0.22
     )
   }
 
@@ -103,7 +169,7 @@ plot_fuzzy_query_sample <- function(
     graphics::text(
       disc_x, disc_y,
       labels = as.character(c(i, j, k)),
-      cex = 0.80, font = 2, col = "white"
+      cex = 1.8, font = 2, col = "white"
     )
 
     lab_x_off <- c(-sqrt(0.04^2),  0,    sqrt(0.08^2))
@@ -113,7 +179,7 @@ plot_fuzzy_query_sample <- function(
       xy[1, ] + lab_x_off,
       xy[2, ] + lab_y_off,
       labels = vertex_labels[c(i, j, k)],
-      cex = 0.80,
+      cex = 1.8,
       font = 2,
       xpd = TRUE
     )
@@ -160,7 +226,7 @@ plot_fuzzy_query_sample <- function(
 
     mtext(
       paste(vertex_labels[c(i, j, k)], collapse = " x "),
-      side = 1, line = 0.2, cex = 0.48, col = "grey50"
+      side = 1, line = 0.2, cex = 1.5, col = "grey50"
     )
   }
 
@@ -249,7 +315,7 @@ plot_fuzzy_query_sample <- function(
     w <- weights[idx, , drop = FALSE]
     n <- ncol(w)
 
-    par(mar = c(6, 3, 3, 3))
+    par(mar = c(10, 5, 4, 5), xpd = NA)
     plot(NULL, xlim = c(0, 2), ylim = c(0, 1),
          axes = FALSE, xlab = "", ylab = "", bty = "n")
 
@@ -262,7 +328,7 @@ plot_fuzzy_query_sample <- function(
         if (val > 0.05)
           graphics::text(1, y_bottom + val / 2,
                          labels = paste0(round(val * 100), "%"),
-                         col = "white", cex = 0.8, font = 2)
+                         col = "white", cex = 1.8, font = 2)
         y_bottom <- y_bottom + val
       }
     }
@@ -271,25 +337,25 @@ plot_fuzzy_query_sample <- function(
 
     axis(2, at = seq(0, 1, 0.2),
          labels = paste0(seq(0, 100, 20), "%"),
-         las = 2, cex.axis = 0.8, col = "grey60", col.axis = "grey30")
+         las = 2, cex.axis = 1.8, col = "grey60", col.axis = "grey30")
 
     mtext(query_sample, side = 1, at = 1,
-          las = 1, cex = 0.85, col = "red", font = 2, line = 0.5)
+          las = 1, cex = 1.8, col = "red", font = 2, line = 0.5)
 
-    legend(x = 1, y = -0.18,
+    legend(x = 1, y = -0.08,
            legend  = paste0(seq_len(n), ". ", vertex_labels),
            fill    = vcols,
            border  = "white",
            ncol    = min(n, 3L),
-           cex     = 0.78,
+           cex     = 1.8,
            bty     = "n",
-           xpd     = TRUE,
+           xpd     = NA,
            xjust   = 0.5,
            yjust   = 1)
 
     title(
       main      = paste0("Archetype composition - ", query_sample),
-      cex.main  = 0.95,
+      cex.main  = 2.2,
       font.main = 1,
       col.main  = "grey20"
     )
@@ -298,7 +364,10 @@ plot_fuzzy_query_sample <- function(
   # ---- sample loop ---------------------------------------------------------
 
   all_subdirs <- list.dirs(models_dir, full.names = TRUE, recursive = FALSE)
-  sample_dirs <- all_subdirs[grepl(sample_pattern, basename(all_subdirs))]
+  sample_dirs <- all_subdirs[
+    grepl(sample_pattern, basename(all_subdirs)) &
+      dir.exists(file.path(all_subdirs, "outputs"))
+  ]
 
   if (!length(sample_dirs))
     stop("No subdirectories matching pattern '", sample_pattern,
@@ -308,31 +377,32 @@ plot_fuzzy_query_sample <- function(
 
   results <- stats::setNames(logical(length(sample_dirs)),
                              basename(sample_dirs))
+  plot_objects <- list()
 
   for (sample_dir in sample_dirs) {
 
     sample_id        <- basename(sample_dir)
     query_sample <- sample_id
-    plots_dir        <- file.path(sample_dir, matrices_subdir, "plots")
+    output_dir        <- file.path(sample_dir, "outputs")
 
     message("")
     message(strrep("=", 45))
-    message("  ", sample_id, " / ", matrices_subdir)
+    message("  ", sample_id)
     message(strrep("=", 45))
 
-    if (!dir.exists(plots_dir)) {
-      warning("No plots/ dir found: ", plots_dir, " -- skipping.")
+    if (!dir.exists(output_dir)) {
+      warning("No outputs/ dir found: ", output_dir, " -- skipping.")
       next
     }
 
     weight_files <- list.files(
-      plots_dir,
+      output_dir,
       pattern    = "_archetype_weights_all_samples\\.csv$",
       full.names = TRUE
     )
 
     if (!length(weight_files)) {
-      warning("No _archetype_weights_all_samples.csv in ", plots_dir, " -- skipping.")
+      warning("No _archetype_weights_all_samples.csv in ", output_dir, " -- skipping.")
       next
     }
 
@@ -355,7 +425,7 @@ plot_fuzzy_query_sample <- function(
       }
 
       csv_id   <- sub("_archetype_weights_all_samples\\.csv$", "", basename(file))
-      out_file <- file.path(plots_dir,
+      out_file <- file.path(output_dir,
                             paste0(prefix, csv_id,
                                    "_archetype_projection.pdf"))
 
@@ -366,6 +436,7 @@ plot_fuzzy_query_sample <- function(
         par(mar = c(2, 2, 2, 2))
         .draw_simple_panel(weights, samples, vertex_labels,
                            vcols, query_sample)
+
 
       } else {
 
@@ -381,28 +452,35 @@ plot_fuzzy_query_sample <- function(
                                   ncol = n_cols, byrow = TRUE)
         layout_mat_safe <- layout_mat
         layout_mat_safe[is.na(layout_mat_safe)] <- 0L
-
         pdf(out_file,
-            width  = n_cols * 3.5,
-            height = n_rows * 3.5 + 0.6)
+            width  = n_cols * 5,
+            height = n_rows * 5 + 1.5)
 
-        layout(layout_mat_safe, heights = rep(3, n_rows))
-        par(mar = c(1.8, 0.5, 1.8, 0.5))
+        layout(layout_mat_safe, heights = rep(5, n_rows))
+        par(mar = c(4, 2, 3, 2), xpd = NA)
 
         for (trio in combos)
           .draw_ternary_panel(trio, weights, samples,
                               vertex_labels, vcols, query_sample)
+
       }
 
       # ---- page 2: stacked bar ------------------------------------
       layout(matrix(1))
-      par(mar = c(6, 3, 3, 3))
+      par(mar = c(9, 4, 4, 4), xpd = NA)
       .draw_stacked_bar(weights, samples, vertex_labels,
                         vcols, query_sample)
 
       dev.off()
       message("  Saved: ", basename(out_file))
       results[sample_id] <- TRUE
+
+      plot_objects[[sample_id]] <- list(
+        files = list(
+          projection_pdf = out_file,
+          output_dir = output_dir
+        )
+      )
     }
   }
 
@@ -414,5 +492,9 @@ plot_fuzzy_query_sample <- function(
           if (n_fail > 0) paste0(", ", n_fail, " skipped.") else ".")
   message(strrep("=", 45))
 
-  invisible(results)
+  invisible(list(
+    processed = results,
+    samples = plot_objects
+  ))
+
 }

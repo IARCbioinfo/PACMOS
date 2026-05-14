@@ -8,7 +8,8 @@
 ^PACMOS\.BiocCheck$
 ^doc($|/)
 ^docs($|/)
-^mofa_env\.yml$
+^pacmos_env\.yml$
 
 # Exclude HDF5
 \.hdf5$
+^doc$

@@ -4,24 +4,21 @@
 \alias{plot_fuzzy_query_sample}
 \title{Plot archetype weight projections}
 \usage{
-plot_fuzzy_query_sample(
-  models_dir,
-  matrices_subdir = "inputs",
-  sample_pattern = "",
-  prefix = ""
-)
+plot_fuzzy_query_sample(models_dir, sample_pattern = "", prefix = "")
 }
 \arguments{
 \item{models_dir}{Character. Root directory folder. Same as `s1_add_sample_to_mofa() outdir`.}
-
-\item{matrices_subdir}{Character. Folder name where `.hdf5` files are stored (`inputs` by default).}
 
 \item{sample_pattern}{Regex to filter sample folder names. Default \code{""} (all).}
 
 \item{prefix}{Optional prefix for output PDF filenames.}
 }
 \value{
-Invisibly returns a named logical vector (sample processed = TRUE).
+Invisibly returns a list with:
+\itemize{
+  \item \code{processed}: named logical vector indicating processed samples.
+  \item \code{samples}: nested list containing output PDF file paths.
+}
 }
 \description{
 Visualizes archetype mixture weights for query and reference samples
@@ -41,5 +38,72 @@ For each sample folder in `models_dir`, this function reads
 If the number of archetypes exceeds three, multiple ternary panels are
 generated for all combinations of three archetypes.
 
-Output PDFs are saved alongside the input CSV files in the `plots/` directory.
+Output PDFs are saved alongside the input CSV files in the `outputs/` directory.
+}
+\examples{
+mofa_dir <- system.file("extdata/MESOMICS_references", package = "PACMOS")
+reference_LFs <- system.file(
+  "extdata/MESOMICS_references",
+  "MESOMICS_latent_factors.csv",
+  package = "PACMOS"
+)
+query_csv <- system.file(
+  "extdata/test_data",
+  "MESOMICS_test_expr.csv",
+  package = "PACMOS"
+)
+out_dir <- file.path(tempdir(), "pacmos_s5")
+dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+
+s1_add_sample_to_mofa(
+  query_matrix_path = query_csv,
+  mofa_dir = mofa_dir,
+  value_data_types = "D_exprB_MOFA",
+  outdir = out_dir,
+  python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python")
+)
+
+s2_run_mofa(
+  models_dir = out_dir,
+  matrices_subdir = "inputs",
+  num_factors = 2,
+  convergence_mode = "fast",
+  maxiter = 5,
+  use_basilisk = FALSE,
+  skip_existing = TRUE,
+  python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python"),
+  views_map = c(RNA = "D_exprB_MOFA"),
+  binary_views = NULL
+)
+
+sample_id <- basename(list.dirs(out_dir, recursive = FALSE, full.names = TRUE)[1])
+
+s3_plot_query_samples_mofa(
+  models_dir = out_dir,
+  matrices_subdir = "inputs",
+  query_sample = sample_id,
+  reference_LFs = reference_LFs,
+  reference_axes = c("Morphology_LF", "Adaptive-response_LF"),
+  group = "group1",
+  python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python")
+)
+archetype_coords <- data.frame(
+  Archetype = c("Cell division", "Tumor-immune-interaction", "Acinar"),
+  Morphology_LF = c(-3.5973, -1.7981, 3.8586),
+  `Adaptive-response_LF` = c(-2.3960, 3.5635, -0.8256),
+  stringsAsFactors = FALSE
+)
+
+infer_fuzzy_weights(
+  models_dir = out_dir,
+  coord = archetype_coords,
+  n_archetypes = 3,
+  reference_axes = c("Morphology_LF", "Adaptive-response_LF"),
+  input_type = "stable"
+)
+
+plot_fuzzy_query_sample(models_dir = out_dir)
+
+
+
 }

@@ -41,6 +41,18 @@
 #' Saves updated MOFA matrices as `.RData` files in `outdir`. One file is saved
 #' per `(data layer, sample)` combination.
 #'
+#' @examples
+#' mofa_dir <- system.file("extdata/MESOMICS_references", package = "PACMOS")
+#' query_csv <- system.file("extdata/test_data", "MESOMICS_test_expr.csv", package = "PACMOS")
+#' out_dir <- file.path(tempdir(), "pacmos_s1")
+#' dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+#' s1_add_sample_to_mofa(
+#'   query_matrix_path = query_csv,
+#'   mofa_dir = mofa_dir,
+#'   value_data_types = "D_exprB_MOFA",
+#'   outdir = out_dir,
+#'   python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python")
+#' )
 #'
 #' @export
 s1_add_sample_to_mofa <- function(query_matrix_path,

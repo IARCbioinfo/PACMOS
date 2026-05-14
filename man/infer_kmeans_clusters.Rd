@@ -6,7 +6,6 @@
 \usage{
 infer_kmeans_clusters(
   models_dir,
-  matrices_subdir,
   k,
   input_type = c("stable", "retrained"),
   lf_cols,
@@ -15,8 +14,6 @@ infer_kmeans_clusters(
 }
 \arguments{
 \item{models_dir}{Root directory folder. Same as `s1_add_sample_to_mofa() outdir`.}
-
-\item{matrices_subdir}{Character. Folder name where `.hdf5` files are stored (`inputs` by default).}
 
 \item{k}{Integer. Number of k-means clusters.}
 
@@ -48,4 +45,61 @@ For each sample, a CSV file is written containing cluster assignments:
 \itemize{
   \item `<sample_id>_sample_clusters.csv` — columns: sample, kmeans_cluster
 }
+}
+\examples{
+mofa_dir <- system.file("extdata/MESOMICS_references", package = "PACMOS")
+reference_LFs <- system.file(
+  "extdata/MESOMICS_references",
+  "MESOMICS_latent_factors.csv",
+  package = "PACMOS"
+)
+query_csv <- system.file(
+  "extdata/test_data",
+  "MESOMICS_test_expr.csv",
+  package = "PACMOS"
+)
+out_dir <- file.path(tempdir(), "pacmos_s4")
+dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+
+s1_add_sample_to_mofa(
+  query_matrix_path = query_csv,
+  mofa_dir = mofa_dir,
+  value_data_types = "D_exprB_MOFA",
+  outdir = out_dir,
+  python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python")
+)
+
+s2_run_mofa(
+  models_dir = out_dir,
+  matrices_subdir = "inputs",
+  num_factors = 2,
+  convergence_mode = "fast",
+  maxiter = 5,
+  use_basilisk = FALSE,
+  skip_existing = TRUE,
+  python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python"),
+  views_map = c(RNA = "D_exprB_MOFA"),
+  binary_views = NULL
+)
+
+sample_id <- basename(list.dirs(out_dir, recursive = FALSE, full.names = TRUE)[1])
+
+s3_plot_query_samples_mofa(
+  models_dir = out_dir,
+  matrices_subdir = "inputs",
+  query_sample = sample_id,
+  reference_LFs = reference_LFs,
+  reference_axes = c("Morphology_LF", "Adaptive-response_LF"),
+  group = "group1",
+  python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python")
+)
+
+infer_kmeans_clusters(
+  models_dir = out_dir,
+  k = 3,
+  input_type = "stable",
+  lf_cols = c("Morphology_LF", "Adaptive-response_LF")
+)
+
+
 }

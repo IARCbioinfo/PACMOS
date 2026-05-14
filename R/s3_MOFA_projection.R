@@ -44,12 +44,50 @@
 #' @param python_bin Path to the Python binary used by the MOFA
 #' environment via the `reticulate` package.
 #'
-#' @param plot_dir Output directory. Defaults to \code{models_dir/plots}.
+#' @param output_dir Output directory. Defaults to each sample folder's \code{outputs/} directory.
 #'
 #' @param prefix Optional character prefix for all written files.
 #'
-#' @return Invisibly returns a data frame of alignment metrics
-#' for each reference axis. Output files (PDFs and CSVs) are written to output dir
+#' @return Invisibly returns a list with:
+#' \itemize{
+#'   \item \code{metrics}: data frame of alignment metrics.
+#'   \item \code{samples}: nested list of per-sample metrics, ggplot objects,
+#'   and output file paths.
+#' }
+#'
+#' @examples
+#' mofa_dir <- system.file("extdata/MESOMICS_references", package = "PACMOS")
+#' reference_LFs <- system.file("extdata/MESOMICS_references", "MESOMICS_latent_factors.csv", package = "PACMOS")
+#' query_csv <- system.file("extdata/test_data", "MESOMICS_test_expr.csv", package = "PACMOS")
+#' out_dir <- file.path(tempdir(), "pacmos_s3")
+#' dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+#' s1_add_sample_to_mofa(
+#'   query_matrix_path = query_csv,
+#'   mofa_dir = mofa_dir,
+#'   value_data_types = "D_exprB_MOFA",
+#'   outdir = out_dir,
+#'   python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python")
+#' )
+#'
+#' s2_run_mofa(
+#'   models_dir = out_dir,
+#'   matrices_subdir = "inputs",
+#'   num_factors = 2,
+#'   maxiter = 5,
+#'   python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python"),
+#'   views_map = c(RNA = "D_exprB_MOFA"),
+#' )
+#'
+#' sample_id <- basename(list.dirs(out_dir, recursive = FALSE, full.names = TRUE)[1])
+#'
+#' s3_plot_query_samples_mofa(
+#'   models_dir = out_dir,
+#'   matrices_subdir = "inputs",
+#'   query_sample = sample_id,
+#'   reference_LFs = reference_LFs,
+#'   reference_axes = c("Morphology_LF", "Adaptive-response_LF"),
+#'   python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python")
+#' )
 #'
 #' @export
 s3_plot_query_samples_mofa <- function(
@@ -61,7 +99,7 @@ s3_plot_query_samples_mofa <- function(
     id_col       = NULL,
     group        = "group1",
     python_bin,
-    plot_dir = NULL,
+    output_dir= NULL,
     prefix       = ""
 ) {
 
@@ -132,7 +170,7 @@ s3_plot_query_samples_mofa <- function(
       paste0("Model  : ", model_id),
       "",
       "Factor assignment (reference axis <- new MOFA factor):",
-      strrep("\u2500", 50),
+      strrep("-", 50),
       mapply(function(ref_ax, mofa_ax, r)
         sprintf("  %-12s  <-  %-12s  r = %+.3f",
                 ref_ax, mofa_ax, r),
@@ -181,11 +219,6 @@ s3_plot_query_samples_mofa <- function(
         ggplot2::aes(label = formatC(Correlation, digits = 2, format = "f")),
         size = 2.8, color = "grey10"
       ) +
-      ggplot2::geom_text(
-        data        = chosen_df,
-        ggplot2::aes(x = Ref_Axis, y = MOFA_Factor, label = "\u2605"),
-        inherit.aes = FALSE, size = 4, vjust = -0.5, color = "black"
-      ) +
       ggplot2::scale_fill_gradient2(
         low = "#4575B4", mid = "white", high = "#D73027",
         midpoint = 0, limits = c(-1, 1), name = "Pearson r"
@@ -205,6 +238,7 @@ s3_plot_query_samples_mofa <- function(
 
     # -- pages 3+: per-axis scatter plots ------------------------------------
     alignment_metrics <- vector("list", length(reference_axes))
+    scatter_plots <- list()
 
     for (j in seq_along(reference_axes)) {
 
@@ -245,24 +279,35 @@ s3_plot_query_samples_mofa <- function(
           x = lim_min, y = lim_max, hjust = 0, vjust = 1,
           label = paste0("r = ",    sprintf("%.3f", r_val),
                          "\nRMSE = ", sprintf("%.3f", rmse_val)),
-          size = 3.3, label.size = 0.4, fill = "white"
+          size = 3.3, fill = "white"
         ) +
         ggplot2::labs(
-          title = paste0(sample_id, " \u2013 ", axis_name),
+          title = paste0(sample_id, " - ", axis_name),
           x = "Reference LF", y = "Matched retrained LF"
         ) +
         ggplot2::theme_classic(base_size = 12)
 
       print(p_sc)
+      scatter_plots[[axis_name]] <- p_sc
+
     }
 
-    do.call(rbind, alignment_metrics)
+    #do.call(rbind, alignment_metrics)
+    list(
+      metrics = do.call(rbind, alignment_metrics),
+      plots = list(
+        summary = p_text,
+        heatmap = p_heat,
+        scatter_by_axis = scatter_plots
+      )
+    )
   }
 
   # ---- main loop -----------------------------------------------------------
 
   n_models        <- length(sample_dirs)
   all_metrics     <- vector("list", n_models)
+  all_sample_results <- list()
 
   for (i in seq_along(sample_dirs)) {
 
@@ -272,11 +317,11 @@ s3_plot_query_samples_mofa <- function(
 
     inputs_dir  <- file.path(sdir, matrices_subdir)
 
-    plot_dir <- if (!is.null(plot_dir)) plot_dir else
-      file.path(inputs_dir, "plots")
+    output_dir<- if (!is.null(output_dir)) output_dir else
+      file.path(sdir, "outputs")
 
-    if (!dir.exists(plot_dir))
-      dir.create(plot_dir, recursive = TRUE)
+    if (!dir.exists(output_dir))
+      dir.create(output_dir, recursive = TRUE)
 
     # locate HDF5
     model_path <- file.path(inputs_dir,
@@ -369,15 +414,30 @@ s3_plot_query_samples_mofa <- function(
 
     #message("  Stable input     : ", nrow(stable_input), " samples x ",
     #        ncol(stable_input), " axes")
-    message("  Writing outputs to: ", plot_dir)
+    message("  Writing outputs to: ", output_dir)
 
     # -- alignment QC PDF + metrics ------------------------------------------
     align_pdf <- file.path(
-      plot_dir,
+      output_dir,
       paste0(prefix, sample_id, "_quality_check_metrics.pdf")
     )
 
-    alignment_df <- .write_alignment_QC_pdf(
+    #alignment_df <- .write_alignment_QC_pdf(
+    #  out_pdf       = align_pdf,
+    #  sample_id     = sample_id,
+    #  model_id      = model_id,
+    #  MOFA.LFs      = MOFA.LFs,
+    #  cor_mat       = cor_mat,
+    #  pick          = pick,
+    #  ref_sub       = ref_sub,
+    #  Zk            = Zk,
+    #  train_samples = train_samples,
+    #  reference_axes = reference_axes
+    #)
+
+    #all_metrics[[i]] <- alignment_df
+
+    qc_result <- .write_alignment_QC_pdf(
       out_pdf       = align_pdf,
       sample_id     = sample_id,
       model_id      = model_id,
@@ -390,34 +450,35 @@ s3_plot_query_samples_mofa <- function(
       reference_axes = reference_axes
     )
 
+    alignment_df <- qc_result$metrics
     all_metrics[[i]] <- alignment_df
 
     # -- CSVs ----------------------------------------------------------------
     write.csv(
       cbind(Sample = query_sample,
             as.data.frame(Zk[query_sample, , drop = FALSE])),
-      file.path(plot_dir,
+      file.path(output_dir,
                 paste0(prefix, sample_id, "_query_sample_LFs.csv")),
       row.names = FALSE
     )
 
     write.csv(
       cbind(Sample = rownames(Zk), as.data.frame(Zk)),
-      file.path(plot_dir,
+      file.path(output_dir,
                 paste0(prefix, sample_id, "_retrained_LFs_all_samples.csv")),
       row.names = FALSE
     )
 
     write.csv(
       cbind(Sample = rownames(stable_input), as.data.frame(stable_input)),
-      file.path(plot_dir,
+      file.path(output_dir,
                 paste0(prefix, sample_id, "_stable_input.csv")),
       row.names = FALSE
     )
 
     write.csv(
       alignment_df,
-      file.path(plot_dir,
+      file.path(output_dir,
                 paste0(prefix, sample_id, "_quality_check_metrics.csv")),
       row.names = FALSE
     )
@@ -428,11 +489,12 @@ s3_plot_query_samples_mofa <- function(
     combos          <- combn(reference_axes, 2, simplify = FALSE)
 
     proj_pdf <- file.path(
-      plot_dir,
+      output_dir,
       paste0(prefix, sample_id, "_projection.pdf")
     )
 
     pdf(proj_pdf, width = 10, height = 8)
+    projection_plots <- list()
 
     for (pair in combos) {
       ax1 <- pair[1]; ax2 <- pair[2]
@@ -453,14 +515,31 @@ s3_plot_query_samples_mofa <- function(
         ggplot2::coord_equal() +
         ggplot2::labs(
           x     = ax1, y = ax2,
-          title = paste0(sample_id, "  |  ", ax1, " vs ", ax2)
+          title = paste0(sample_id, "  -  ", ax1, " vs ", ax2)
         ) +
         ggplot2::theme_bw(base_size = 12)
 
       print(p)
+
+      plot_name <- paste(pair, collapse = "_vs_")
+      projection_plots[[plot_name]] <- p
     }
 
     dev.off()
+    all_sample_results[[sample_id]] <- list(
+      metrics = alignment_df,
+      plots = list(
+        alignment_summary = qc_result$plots$summary,
+        alignment_heatmap = qc_result$plots$heatmap,
+        scatter_by_axis = qc_result$plots$scatter_by_axis,
+        projection_pairs = projection_plots
+      ),
+      files = list(
+        alignment_qc_pdf = align_pdf,
+        projection_pdf = proj_pdf,
+        output_dir= output_dir
+      )
+    )
     message("  [DONE] ", sample_id)
   }
 
@@ -476,8 +555,13 @@ s3_plot_query_samples_mofa <- function(
   message(strrep("=", 45))
   #message("  All ", n_models, " model(s) processed.")
   #message("  Aggregated metrics: ", agg_path)
-  message("  Outputs in        : ", plot_dir)
+  message("  Outputs in        : ", output_dir)
   message(strrep("=", 45))
 
-  invisible(all_metrics_df)
+  #invisible(all_metrics_df)
+  invisible(list(
+    metrics = all_metrics_df,
+    plots = all_sample_results[[query_sample]]$plots,
+    files = all_sample_results[[query_sample]]$files
+  ))
 }

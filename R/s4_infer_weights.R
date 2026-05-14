@@ -24,8 +24,6 @@
 #'
 #' @param models_dir      Character. Root directory folder. Same as `s1_add_sample_to_mofa() outdir`.
 #'
-#' @param matrices_subdir Character. Folder name where `.hdf5` files are stored (`inputs` by default).
-#'
 #' @param coord           data.frame of archetype coordinates. Either:
 #'   (A) first column = archetype names, remaining columns = coordinates, or
 #'   (B) rownames = archetype names, all columns = coordinates.
@@ -52,11 +50,72 @@
 #' @return Invisibly returns a data.frame with columns
 #'   \code{Sample} + one column per archetype.
 #'
+#' @examples
+#' mofa_dir <- system.file("extdata/MESOMICS_references", package = "PACMOS")
+#' reference_LFs <- system.file(
+#'   "extdata/MESOMICS_references",
+#'   "MESOMICS_latent_factors.csv",
+#'   package = "PACMOS"
+#' )
+#' query_csv <- system.file(
+#'   "extdata/test_data",
+#'   "MESOMICS_test_expr.csv",
+#'   package = "PACMOS"
+#' )
+#' out_dir <- file.path(tempdir(), "pacmos_s4")
+#' dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
+#'
+#' s1_add_sample_to_mofa(
+#'   query_matrix_path = query_csv,
+#'   mofa_dir = mofa_dir,
+#'   value_data_types = "D_exprB_MOFA",
+#'   outdir = out_dir,
+#'   python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python")
+#' )
+#'
+#' s2_run_mofa(
+#'   models_dir = out_dir,
+#'   matrices_subdir = "inputs",
+#'   num_factors = 2,
+#'   convergence_mode = "fast",
+#'   maxiter = 5,
+#'   use_basilisk = FALSE,
+#'   skip_existing = TRUE,
+#'   python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python"),
+#'   views_map = c(RNA = "D_exprB_MOFA"),
+#'   binary_views = NULL
+#' )
+#'
+#' sample_id <- basename(list.dirs(out_dir, recursive = FALSE, full.names = TRUE)[1])
+#'
+#' s3_plot_query_samples_mofa(
+#'   models_dir = out_dir,
+#'   matrices_subdir = "inputs",
+#'   query_sample = sample_id,
+#'   reference_LFs = reference_LFs,
+#'   reference_axes = c("Morphology_LF", "Adaptive-response_LF"),
+#'   group = "group1",
+#'   python_bin = Sys.which("/home/lipikal/miniconda3/envs/pacmos_env/bin/python")
+#' )
+#'
+#' archetype_coords <- data.frame(
+#'   Archetype = c("Cell division", "Tumor-immune-interaction", "Acinar"),
+#'   Morphology_LF = c(-3.5973, -1.7981, 3.8586),
+#'   `Adaptive-response_LF` = c(-2.3960, 3.5635, -0.8256),
+#'   stringsAsFactors = FALSE
+#' )
+#'
+#' infer_fuzzy_weights(
+#'   models_dir = out_dir,
+#'   coord = archetype_coords,
+#'   n_archetypes = 3,
+#'   reference_axes = c("Morphology_LF", "Adaptive-response_LF"),
+#'   input_type = "stable"
+#' )
 #'
 #' @export
 infer_fuzzy_weights <- function(
     models_dir,
-    matrices_subdir,
     coord,
     n_archetypes,
     reference_axes = NULL,
@@ -131,13 +190,13 @@ infer_fuzzy_weights <- function(
 
   sample_dirs <- sample_dirs[
     file.exists(
-      file.path(sample_dirs, matrices_subdir, "plots",
+      file.path(sample_dirs, "outputs",
                 paste0(basename(sample_dirs), file_suffix))
     )
   ]
 
   if (!length(sample_dirs))
-    stop("No valid sample dirs found. Check models_dir and matrices_subdir.")
+    stop("No valid sample dirs found. Check models_dir and sample outputs folders.")
 
   message("Found ", length(sample_dirs), " sample dir(s).")
 
@@ -158,7 +217,7 @@ infer_fuzzy_weights <- function(
         message(strrep("=", 45))
 
         si_path <- file.path(
-          sdir, matrices_subdir, "plots",
+          sdir, "outputs",
           paste0(sample_id, file_suffix)
         )
 
@@ -233,7 +292,7 @@ infer_fuzzy_weights <- function(
           next
         }
 
-        sample_plot_dir <- file.path(sdir, matrices_subdir, "plots")
+        sample_plot_dir <- file.path(sdir, "outputs")
 
         # ---- CSV 1: query sample only ----------------------------------------
 
@@ -280,8 +339,13 @@ infer_fuzzy_weights <- function(
     })
   )
 
+  if (is.null(results_df) || nrow(results_df) == 0) {
+    stop("No archetype weights were computed for any sample.")
+  }
+
   for (col in archetype_names)
     results_df[[col]] <- as.numeric(results_df[[col]])
+
 
   agg_csv <- file.path(out_dir,
                        paste0(prefix,
