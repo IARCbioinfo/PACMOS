@@ -52,27 +52,34 @@ This vignette demonstrates how to:
 
 ## Step 0: Installation
 
-Before using PACMOS, make sure you have the required Python environment.
+Before using PACMOS, create the required Conda Python environment from the package environment file.
 
-For Linux/macOS, open a terminal.  
+### Linux/macOS
+
+Open a terminal and run:
 
 ```{bash, eval=FALSE}
 git clone https://github.com/IARCbioinfo/PACMOS.git
 cd PACMOS
+
 conda env create -f pacmos_env.yml
 conda activate pacmos_env
 
-# Linux/macOS users:
-export PACMOS_PYTHON=$(which python)
-echo $PACMOS_PYTHON
+which python
 ```
 
-For Windows, download the PACMOS repository as a ZIP file from https://github.com/IARCbioinfo/PACMOS. Extract the ZIP archive, then open the **Anaconda Prompt** and run:
+The last command returns the Python executable from the `pacmos_env` Conda environment, for example:
+
+```text
+/home/user/miniconda3/envs/pacmos_env/bin/python
+```
+
+### Windows
+
+Download the PACMOS repository as a ZIP file from GitHub and extract it. Then open the **Anaconda Prompt** and run:
 
 ```{bash, eval=FALSE}
-cd <dir-to-PACMOS>\PACMOS-main
-
-dir
+cd <path-to-PACMOS>\PACMOS-main
 
 conda env create -f pacmos_env.yml
 conda activate pacmos_env
@@ -80,18 +87,51 @@ conda activate pacmos_env
 where python
 ```
 
-These commands return the Python executable inside the `pacmos_env` Conda environment. The path will look similar to:
-```text
-## Linux/macOS
-/home/user/miniconda3/envs/pacmos_env/bin/python
+This returns the Python executable from the `pacmos_env` Conda environment, for example:
 
-## windows
-C:/Users/YOUR_USERNAME/miniconda3/envs/pacmos_env/python.exe```
+```text
+C:/Users/YOUR_USERNAME/miniconda3/envs/pacmos_env/python.exe
 ```
+
+### Install PACMOS
+
+Install PACMOS from GitHub in R:
 
 ```{r install, eval=FALSE}
 # install.packages("devtools")
-devtools::install_github("IARCbioinfo/PACMOS", dependencies = TRUE)
+devtools::install_github(
+  "IARCbioinfo/PACMOS",
+  dependencies = TRUE
+)
+```
+
+### Set the Python path before running the vignette
+
+PACMOS uses the `PACMOS_PYTHON` environment variable to identify the Python executable from the `pacmos_env` Conda environment.
+
+Before running or rebuilding the vignette locally, set this variable in your **R console**.
+
+```{r set-python, eval=FALSE}
+## Linux/macOS
+Sys.setenv(
+  PACMOS_PYTHON =
+    "/home/user/miniconda3/envs/pacmos_env/bin/python"
+) # replace with your path
+
+## Windows
+Sys.setenv(
+  PACMOS_PYTHON =
+    "C:/Users/YOUR_USERNAME/miniconda3/envs/pacmos_env/python.exe"
+) # replace with your path
+
+file.exists(Sys.getenv("PACMOS_PYTHON"))
+# [1] TRUE
+```
+
+To rebuild the vignettes locally after setting `PACMOS_PYTHON`, run:
+
+```{r build-vignettes, eval=FALSE}
+devtools::build_vignettes()
 ```
 
 ```{r setup}
@@ -109,8 +149,16 @@ out_dir <- file.path('.', "MESOMICS_output")
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 out_dir
 
-python_path <- "/home/lipikal/miniconda3/envs/pacmos_env/bin/python" # replace with your local path
-Sys.getenv(python_path, unset = "")
+
+python_path <- Sys.getenv("PACMOS_PYTHON", unset = "")
+
+if (!nzchar(python_path) || !file.exists(python_path)) {
+  stop(
+    "PACMOS_PYTHON is not set to a valid Python path.\n",
+    "Before running this vignette, set PACMOS_PYTHON to the Python executable ",
+    "from your pacmos_env Conda environment."
+  )
+}
 ```
 
 ## Step 1: Add query samples to MOFA inputs

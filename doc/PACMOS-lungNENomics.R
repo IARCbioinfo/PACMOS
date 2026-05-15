@@ -1,12 +1,34 @@
 ## ----include = FALSE----------------------------------------------------------
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
+collapse = TRUE,
+comment = "#>"
 )
 
 ## ----install, eval=FALSE------------------------------------------------------
 #  # install.packages("devtools")
-#  devtools::install_github("IARCbioinfo/PACMOS", dependencies = TRUE)
+#  devtools::install_github(
+#    "IARCbioinfo/PACMOS",
+#    dependencies = TRUE
+#  )
+
+## ----set-python, eval=FALSE---------------------------------------------------
+#  ## Linux/macOS
+#  Sys.setenv(
+#    PACMOS_PYTHON =
+#      "/home/lipikal/miniconda3/envs/pacmos_env/bin/python"
+#  ) # replace with your path
+#  
+#  ## Windows
+#  Sys.setenv(
+#    PACMOS_PYTHON =
+#      "C:/Users/YOUR_USERNAME/miniconda3/envs/pacmos_env/python.exe"
+#  ) # replace with your path
+#  
+#  file.exists(Sys.getenv("PACMOS_PYTHON"))
+#  # [1] TRUE
+
+## ----build-vignettes, eval=FALSE----------------------------------------------
+#  devtools::build_vignettes()
 
 ## ----setup--------------------------------------------------------------------
 library(PACMOS)
@@ -22,8 +44,15 @@ dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 out_dir
 
 
-python_path <- "/home/lipikal/miniconda3/envs/pacmos_env/bin/python" # replace with your local path
-Sys.getenv(python_path, unset = "")
+python_path <- Sys.getenv("PACMOS_PYTHON", unset = "")
+
+if (!nzchar(python_path) || !file.exists(python_path)) {
+  stop(
+    "PACMOS_PYTHON is not set to a valid Python path.\n",
+    "Before running this vignette, set PACMOS_PYTHON to the Python executable ",
+    "from your pacmos_env Conda environment."
+  )
+}
 
 ## ----run-step1, results='markup', warning=FALSE-------------------------------
 
