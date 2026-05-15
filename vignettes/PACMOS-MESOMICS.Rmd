@@ -109,9 +109,8 @@ out_dir <- file.path('.', "MESOMICS_output")
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 out_dir
 
-python_path <- "/home/lipikal/miniconda3/envs/pacmos_env/bin/python" 
-                # replace with your local path
-
+python_path <- "/home/lipikal/miniconda3/envs/pacmos_env/bin/python" # replace with your local path
+Sys.getenv(python_path, unset = "")
 ```
 
 ## Step 1: Add query samples to MOFA inputs
