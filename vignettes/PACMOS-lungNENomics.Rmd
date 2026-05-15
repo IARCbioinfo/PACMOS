@@ -11,7 +11,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
   
-  ```{r, include = FALSE}
+```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
@@ -249,7 +249,7 @@ Step 3 checks whether the latent factors learned after adding the query sample c
 
 The QC PDF contains three main diagnostics (Good alignment is indicated by high absolute correlation, a clear diagonal trend in the scatter plot, and relatively low RMSE):
   
-  1. **Factor assignment summary**: shows which retrained MOFA factor was matched to each reference latent factor.
+1. **Factor assignment summary**: shows which retrained MOFA factor was matched to each reference latent factor.
 
 2. **Correlation heatmap**: The heatmap shows correlations between retrained MOFA factors and reference latent factors. Rows are retrained MOFA factors and columns are reference axes. The black boundary marks the selected factor for each reference axis.
 
