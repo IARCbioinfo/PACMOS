@@ -19,5 +19,4 @@ PACMOS.BiocCheck/
 
 # Ignore heavy files inside docs
 docs/**/*.hdf5
-/doc/
 /Meta/
