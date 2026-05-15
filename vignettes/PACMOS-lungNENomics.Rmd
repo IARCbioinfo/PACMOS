@@ -2,8 +2,8 @@
 title: "PACMOS-lungNEN-fuzzy-tutorial"
 output:
   rmarkdown::html_vignette:
-  toc: true
-  toc_depth: 2
+    toc: true
+    toc_depth: 2
 self_contained: true
 vignette: >
   %\VignetteIndexEntry{2. PACMOS-lungNENomics-fuzzy-tutorial}
@@ -33,19 +33,26 @@ div.sourceCode {
 ```
 
 # Introduction
+PACMOS is an R package designed to project new query samples into a reference multi-omics latent space derived from MOFA models, enabling sample-level interpretation within an established biological context. It is particularly suited for translational and cancer multi-omics applications where robust comparison of new samples against established molecular reference cohorts is required.
 
-This vignette shows how to:
+This vignette demonstrates the PACMOS workflow using the LungNET dataset generated from lung neuroendocrine tumours from the LungNENomics cohort, based on the integrative multi-omics framework described at https://doi.org/10.1101/2025.07.18.25331556.
 
-0. Installation of PACMOS.
-1. Add a query sample to MOFA reference inputs,
-2. Run MOFA2,
-3. Project query sample into reference MOFA space,
-4. Infer archetype weights of query sample,
-5. Plot query sample onto Pareto archetype space.
+The reference datasets required by PACMOS are provided within the package under inst/extdata/lungNEN_references/. These reference objects consist of MOFA-compatible matrices where rows correspond to genes or molecular features and columns correspond to reference samples across multiple omics layers.
+
+Query samples are expected as one or more CSV files in which the first column contains gene or feature identifiers, followed by one or more columns representing query samples. Query datasets should use feature identifiers compatible with the reference matrices and may contain one or several omics modalities corresponding to the reference MOFA views.
+
+This vignette demonstrates how to:
+
+0. Install PACMOS
+1. Add query samples to MOFA reference inputs
+2. Run MOFA2 retraining
+3. Project query samples into the reference MOFA latent space
+4. Infer archetype weights of query samples
+5. Visualize query samples within Pareto archetype space
 
 ## Step 0: Installation
 
-Before using lungNENomics, make sure you have the required Python environment.
+Before using PACMOS, make sure you have the required Python environment.
 
 For Linux/macOS, open a terminal.  
 
@@ -56,8 +63,7 @@ conda env create -f pacmos_env.yml
 conda activate pacmos_env
 
 # Linux/macOS users:
-export PACMOS_PYTHON=$(which python)
-echo $PACMOS_PYTHON
+which python
 ```
 
 For Windows, download the PACMOS repository as a ZIP file from https://github.com/IARCbioinfo/PACMOS. Extract the ZIP archive, then open the **Anaconda Prompt** and run:
@@ -73,19 +79,30 @@ conda activate pacmos_env
 where python
 ```
 
-This will return a path similar to:
+These commands return the Python executable inside the `pacmos_env` Conda environment. The path will look similar to:
 
 ```text
-C:\Users\YOUR_USERNAME\miniconda3\envs\pacmos_env\python.exe
+## Linux/macOS
+/home/user/miniconda3/envs/pacmos_env/bin/python
+
+## windows
+C:/Users/YOUR_USERNAME/miniconda3/envs/pacmos_env/python.exe
 ```
+Before installing PACMOS with vignettes, set `PACMOS_PYTHON` in your R console to the Python executable from your own `pacmos_env` Conda environment. Replace the example path below with your local path.
+In R:
 
-Then in R run:
-
-```{r, eval=FALSE}
+```{r, eval=TRUE}
+## Linux/macOS
 Sys.setenv(
   PACMOS_PYTHON =
-    "C:/Users/YOUR_USERNAME/miniconda3/envs/pacmos_env/python.exe"
+    "/home/lipikal/miniconda3/envs/pacmos_env/bin/python" # replace with your path
 )
+
+## Windows
+#Sys.setenv(
+#  PACMOS_PYTHON =
+#    "C:/Users/YOUR_USERNAME/miniconda3/envs/pacmos_env/python.exe"
+#)
 ```
 
 ```{r install, eval=FALSE}
@@ -109,12 +126,15 @@ dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 out_dir
 
 
-python_path <- Sys.getenv("PACMOS_PYTHON")
+python_path <- Sys.getenv("PACMOS_PYTHON", unset = "")
 
-if (!file.exists(python_path)) {
+run_pacmos <- nzchar(python_path) && file.exists(python_path)
+
+if (!run_pacmos) {
   stop(
-    "PACMOS_PYTHON is not set correctly.\n",
-    "Activate pacmos_env and set PACMOS_PYTHON to your conda python path."
+    "PACMOS_PYTHON is not set to a valid Python path.\n",
+    "Before building this vignette, create and activate the PACMOS Conda ",
+    "environment, then set PACMOS_PYTHON to its Python executable."
   )
 }
 ```
