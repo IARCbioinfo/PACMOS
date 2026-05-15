@@ -6,7 +6,7 @@ output:
     toc_depth: 2
 self_contained: true
 vignette: >
-  %\VignetteIndexEntry{2. PACMOS-lungNENomics-fuzzy-tutorial}
+  %\VignetteIndexEntry{PACMOS-lungNENomics-fuzzy-tutorial}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
