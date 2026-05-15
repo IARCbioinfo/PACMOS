@@ -80,32 +80,13 @@ conda activate pacmos_env
 where python
 ```
 
-This will return a path similar to:
-
-
+These commands return the Python executable inside the `pacmos_env` Conda environment. The path will look similar to:
 ```text
 ## Linux/macOS
 /home/user/miniconda3/envs/pacmos_env/bin/python
 
 ## windows
 C:/Users/YOUR_USERNAME/miniconda3/envs/pacmos_env/python.exe```
-```
-
-Before installing PACMOS with vignettes, set `PACMOS_PYTHON` in your R console to the Python executable from your own `pacmos_env` Conda environment. Replace the example path below with your local path.
-In R:
-
-```{r, eval=TRUE}
-## Linux/macOS
-Sys.setenv(
-  PACMOS_PYTHON =
-    "/home/lipikal/miniconda3/envs/pacmos_env/bin/python" # replace with your path
-)
-
-## Windows
-#Sys.setenv(
-#  PACMOS_PYTHON =
-#    "C:/Users/YOUR_USERNAME/miniconda3/envs/pacmos_env/python.exe"
-#)
 ```
 
 ```{r install, eval=FALSE}
@@ -128,17 +109,9 @@ out_dir <- file.path('.', "MESOMICS_output")
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 out_dir
 
-python_path <- Sys.getenv("PACMOS_PYTHON", unset = "")
+python_path <- "/home/lipikal/miniconda3/envs/pacmos_env/bin/python" 
+                # replace with your local path
 
-run_pacmos <- nzchar(python_path) && file.exists(python_path)
-
-if (!run_pacmos) {
-  stop(
-    "PACMOS_PYTHON is not set to a valid Python path.\n",
-    "Before building this vignette, create and activate the PACMOS Conda ",
-    "environment, then set PACMOS_PYTHON to its Python executable."
-  )
-}
 ```
 
 ## Step 1: Add query samples to MOFA inputs

@@ -4,19 +4,6 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 
-## ----eval=TRUE----------------------------------------------------------------
-## Linux/macOS
-Sys.setenv(
-  PACMOS_PYTHON =
-    "/home/lipikal/miniconda3/envs/pacmos_env/bin/python" # replace with your path
-)
-
-## Windows
-#Sys.setenv(
-#  PACMOS_PYTHON =
-#    "C:/Users/YOUR_USERNAME/miniconda3/envs/pacmos_env/python.exe"
-#)
-
 ## ----install, eval=FALSE------------------------------------------------------
 #  # install.packages("devtools")
 #  devtools::install_github("IARCbioinfo/PACMOS", dependencies = TRUE)
@@ -34,17 +21,9 @@ out_dir <- file.path('.', "MESOMICS_output")
 dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 out_dir
 
-python_path <- Sys.getenv("PACMOS_PYTHON", unset = "")
+python_path <- "/home/lipikal/miniconda3/envs/pacmos_env/bin/python" 
+                # replace with your local path
 
-run_pacmos <- nzchar(python_path) && file.exists(python_path)
-
-if (!run_pacmos) {
-  stop(
-    "PACMOS_PYTHON is not set to a valid Python path.\n",
-    "Before building this vignette, create and activate the PACMOS Conda ",
-    "environment, then set PACMOS_PYTHON to its Python executable."
-  )
-}
 
 ## ----run-step1, results='markup', warning=FALSE-------------------------------
 
