@@ -79,7 +79,9 @@
 #'   views_map = c(RNA = "D_exprB_MOFA")
 #' )
 #'
-#' sample_id <- basename(list.dirs(out_dir, recursive = FALSE, full.names = TRUE)[1])
+#' sample_dirs <- list.dirs(out_dir, recursive = FALSE, full.names = TRUE)
+#' sample_dirs <- sample_dirs[dir.exists(file.path(sample_dirs, "inputs"))]
+#' sample_id <- basename(sample_dirs[1])
 #'
 #' s3_plot_query_samples_mofa(
 #'   models_dir = out_dir,
