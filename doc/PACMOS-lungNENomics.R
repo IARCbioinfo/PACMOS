@@ -4,13 +4,6 @@ collapse = TRUE,
 comment = "#>"
 )
 
-## ----install, eval=FALSE------------------------------------------------------
-#  # install.packages("devtools")
-#  devtools::install_github(
-#    "IARCbioinfo/PACMOS",
-#    dependencies = TRUE
-#  )
-
 ## ----set-python, eval=FALSE---------------------------------------------------
 #  ## Linux/macOS
 #  Sys.setenv(
@@ -23,12 +16,14 @@ comment = "#>"
 #    PACMOS_PYTHON =
 #      "C:/Users/YOUR_USERNAME/miniconda3/envs/pacmos_env/python.exe"
 #  ) # replace with your path
-#  
-#  file.exists(Sys.getenv("PACMOS_PYTHON"))
-#  # [1] TRUE
 
-## ----build-vignettes, eval=FALSE----------------------------------------------
-#  devtools::build_vignettes()
+## ----install, eval=FALSE------------------------------------------------------
+#  # install.packages("devtools")
+#  devtools::install_github(
+#    "IARCbioinfo/PACMOS",
+#    dependencies = TRUE,
+#    build_vignettes = TRUE
+#  )
 
 ## ----setup--------------------------------------------------------------------
 library(PACMOS)

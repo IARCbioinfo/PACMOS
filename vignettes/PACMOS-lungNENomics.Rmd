@@ -6,12 +6,12 @@ output:
     toc_depth: 2
 self_contained: true
 vignette: >
-  %\VignetteIndexEntry{PACMOS-lungNENomics-fuzzy-tutorial}
+  %\VignetteIndexEntry{2. PACMOS-lungNENomics-fuzzy-tutorial}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
   
-```{r, include = FALSE}
+  ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
@@ -93,23 +93,11 @@ This returns the Python executable from the `pacmos_env` Conda environment, for 
 C:/Users/YOUR_USERNAME/miniconda3/envs/pacmos_env/python.exe
 ```
 
-### Install PACMOS
-
-Install PACMOS from GitHub in R:
-
-```{r install, eval=FALSE}
-# install.packages("devtools")
-devtools::install_github(
-  "IARCbioinfo/PACMOS",
-  dependencies = TRUE
-)
-```
-
-### Set the Python path before running the vignette
+### Set the Python path
 
 PACMOS uses the `PACMOS_PYTHON` environment variable to identify the Python executable from the `pacmos_env` Conda environment.
 
-Before running or rebuilding the vignette locally, set this variable in your **R console**.
+Before running, set this variable in your **R console**.
 
 ```{r set-python, eval=FALSE}
 ## Linux/macOS
@@ -123,15 +111,19 @@ Sys.setenv(
   PACMOS_PYTHON =
     "C:/Users/YOUR_USERNAME/miniconda3/envs/pacmos_env/python.exe"
 ) # replace with your path
-
-file.exists(Sys.getenv("PACMOS_PYTHON"))
-# [1] TRUE
 ```
 
-To rebuild the vignettes locally after setting `PACMOS_PYTHON`, run:
+### Install PACMOS
 
-```{r build-vignettes, eval=FALSE}
-devtools::build_vignettes()
+Install PACMOS from GitHub in R:
+
+```{r install, eval=FALSE}
+# install.packages("devtools")
+devtools::install_github(
+  "IARCbioinfo/PACMOS",
+  dependencies = TRUE,
+  build_vignettes = TRUE
+)
 ```
 
 ```{r setup}
@@ -249,7 +241,7 @@ Step 3 checks whether the latent factors learned after adding the query sample c
 
 The QC PDF contains three main diagnostics (Good alignment is indicated by high absolute correlation, a clear diagonal trend in the scatter plot, and relatively low RMSE):
   
-1. **Factor assignment summary**: shows which retrained MOFA factor was matched to each reference latent factor.
+  1. **Factor assignment summary**: shows which retrained MOFA factor was matched to each reference latent factor.
 
 2. **Correlation heatmap**: The heatmap shows correlations between retrained MOFA factors and reference latent factors. Rows are retrained MOFA factors and columns are reference axes. The black boundary marks the selected factor for each reference axis.
 

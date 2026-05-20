@@ -4,13 +4,6 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 
-## ----install, eval=FALSE------------------------------------------------------
-#  # install.packages("devtools")
-#  devtools::install_github(
-#    "IARCbioinfo/PACMOS",
-#    dependencies = TRUE
-#  )
-
 ## ----set-python, eval=FALSE---------------------------------------------------
 #  ## Linux/macOS
 #  Sys.setenv(
@@ -23,12 +16,14 @@ knitr::opts_chunk$set(
 #    PACMOS_PYTHON =
 #      "C:/Users/YOUR_USERNAME/miniconda3/envs/pacmos_env/python.exe"
 #  ) # replace with your path
-#  
-#  file.exists(Sys.getenv("PACMOS_PYTHON"))
-#  # [1] TRUE
 
-## ----build-vignettes, eval=FALSE----------------------------------------------
-#  devtools::build_vignettes()
+## ----install, eval=FALSE------------------------------------------------------
+#  # install.packages("devtools")
+#  devtools::install_github(
+#    "IARCbioinfo/PACMOS",
+#    dependencies = TRUE,
+#    build_vignettes = TRUE
+#  )
 
 ## ----setup--------------------------------------------------------------------
 library(PACMOS)
@@ -44,7 +39,7 @@ dir.create(out_dir, recursive = TRUE, showWarnings = FALSE)
 out_dir
 
 
-python_path <- Sys.getenv("PACMOS_PYTHON", unset = "")
+python_path <- Sys.getenv("PACMOS_PYTHON")
 
 if (!nzchar(python_path) || !file.exists(python_path)) {
   stop(
