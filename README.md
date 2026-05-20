@@ -22,7 +22,13 @@ The package is designed for reproducible multi-omics datasets, enabling:
   <li>Fuzzy/Hard clustering.</li>
   <li>Visualization of clustering.</li>
   </ul>
-  
+
+<img 
+  src="man/figures/method_160526.png"
+  width="1200"
+  style="display:block; margin:auto;"
+/>
+
 ## Installation
 
 You can install the development version of PACMOS from
@@ -34,7 +40,9 @@ devtools::install_github("IARCbioinfo/PACMOS", dependencies = TRUE)
 ```
 
 ## Tutorial
-A tutorial on the usage of PACMOS is available in the docs, which is available at this [link](https://github.com/lipikakalson/PACMOS/blob/main/doc/PACMOS-tutorial.html).
+A tutorial on the usage of PACMOS is available in the docs folder. PACMOS has been validated on two datasets:
+  - [Pleural Mesothelioma (MESOMICS)](https://github.com/IARCbioinfo/PACMOS/blob/main/doc/PACMOS-MESOMICS.html)
+  - [Lung neuroendocrine tumors (lungNENomics)](https://github.com/IARCbioinfo/PACMOS/blob/main/doc/PACMOS-lungNENomics.html)
 
 ## Functions
 
@@ -91,14 +99,14 @@ This function projects query samples into the reference latent factor space and 
 ```
 s3_plot_query_samples_mofa(
   models_dir,
-  matrices_subdir,
+  matrices_subdir = "inputs",
   query_sample,
   reference_LFs,
   reference_axes,
   id_col = NULL,
   group = "group1",
-  python_bin,
-  plot_dir = NULL,
+  python_bin   = NULL,
+  output_dir= NULL,
   prefix = ""
 )
 ```
@@ -112,7 +120,7 @@ where,
   <li>id_col          =  Character. Column name in \code{reference_LFs} that contains sample identifiers. These IDs must match the sample names used in the MOFA model. If NULL, the function uses the "Sample" column if present, otherwise the first column.</li>
   <li>group           =  MOFA group name (default \code{"group1"})</li>
   <li>python_bin      =  Path to the Python binary used by the MOFA environment via the `reticulate` package.</li>
-  <li>plot_dir        =  Output dir where the results are saved (default is `plots`)</li>
+  <li>output_dir      =  Output dir where the results are saved (default is `plots`)</li>
   <li>prefix          =  Character prefix for all written files.</li>
 </ol>
 
@@ -137,7 +145,6 @@ archetype_coords <- data.frame(
 
 infer_fuzzy_weights(
   models_dir,
-  matrices_subdir,
   coord,
   n_archetypes,
   reference_axes = NULL,
@@ -149,7 +156,6 @@ infer_fuzzy_weights(
 where,
 <ol>
   <li>models_dir      =  Root directory folder. Same as `s1_add_sample_to_mofa() outdir`.</li>
-  <li>matrices_subdir =  Folder name where `.hdf5` files are stored (`inputs` by default).</li>
   <li>coord           =  Data frame of archetype coordinates</li>
   <li>n_archetypes    =  Expected number of archetypes.</li>
   <li>reference_axes  =  Latent factors column names (from reference) to use for weight inference. These must match column names in the input matrices and correspond to the same dimensions used to define the archetype coordinates in `coord`. If NULL, all numeric columns are used.</li>
@@ -163,7 +169,6 @@ This function visualizes the archetype composition of query samples in the refer
 ```
 plot_fuzzy_query_sample(
   models_dir,
-  matrices_subdir = "inputs",
   sample_pattern = "",
   prefix = ""
 )
@@ -171,7 +176,6 @@ plot_fuzzy_query_sample(
 where,
 <ol>
   <li>models_dir      =  Root directory folder. Same as `s1_add_sample_to_mofa() outdir`.</li>
-  <li>matrices_subdir =  Folder name where `.hdf5` files are stored (`inputs` by default).</li>
   <li>sample_pattern  =  Regex to filter sample folder names.</li>
   <li>prefix          =  Prefix for output PDF filenames.</li>
 </ol>
@@ -181,8 +185,8 @@ where,
 This function assigns each query sample to a discrete cluster using k-means clustering in the latent factor space.
 ```
 infer_kmeans_clusters(models_dir,
-                      matrices_subdir,
                       k,
+                      input_type = c("stable", "retrained"),
                       lf_cols,
                       prefix = "")
 
@@ -191,9 +195,11 @@ infer_kmeans_clusters(models_dir,
 where,
 <ol>
   <li>models_dir      =  Root directory folder. Same as `s1_add_sample_to_mofa() outdir`.</li>
-  <li>matrices_subdir =  Character. Folder name where `.hdf5` files are stored (`inputs` by default).</li>
   <li>k               =  Number of k-means clusters.</li>
+  <li>input_type      = Which aligned matrix to use as input. Either "stable" (reference + query; from `_stable_input.csv`) or "retrained" (all retrained model samples; from `_retrained_LFs_all_samples.csv`).</li>
   <li>lf_cols         =  Character vector specifying which latent factor columns to use as features for k-means clustering. These define the feature space for clustering and must exist in the input matrix.</li>
+  <li>prefix          =  Prefix for output PDF filenames.</li>
+
 </ol>
 
 ### Step 5
@@ -201,7 +207,6 @@ This function visualizes the hard clustering results obtained from infer_kmeans_
 ```
 plot_kmeans_query_sample(
   models_dir,
-  matrices_subdir = "inputs",
   input_type = c("stable", "retrained"),
   lf_cols,
   ref_labels_path,
@@ -213,7 +218,6 @@ plot_kmeans_query_sample(
 where,
 <ol>
   <li>models_dir      =  Root directory folder. Same as `s1_add_sample_to_mofa() outdir`.</li>
-  <li>matrices_subdir =  Character. Folder name where `.hdf5` files are stored (`inputs` by default).</li>
   <li>input_type      =  Which aligned matrix to use as input. Either "stable" (reference + query; from `_stable_input.csv`) or "retrained" (all retrained model samples; from `_retrained_LFs_all_samples.csv`).</li>
   <li>lf_cols         =  Character vector specifying which latent factor columns to visualize. These columns must exist in the aligned latent factor matrix and define the axes used for pairwise scatter plots. All pairwise combinations of lf_cols are plotted. </li>
   <li>ref_labels_path =  Path to CSV containing reference labels.
@@ -229,29 +233,29 @@ where,
     <inputs>/
       value_data_type_query_sample.RData (Step 1 output)
         MOFA-query_sample.hdf5 (Step 2 output)
-        <plots>/
-          #--Step 3 outputs--
-          query_sample_projection.pdf
-          query_sample__quality_check_metrics.csv
-          query_sample__quality_check_metrics.pdf
-          query_sample_query_sample_LFs.csv
-          query_sample__retrained_LFs_all_samples.csv
-          query_sample__stable_input.csv
+    <outputs>/
+        #--Step 3 outputs--
+        query_sample_projection.pdf
+        query_sample_quality_check_metrics.csv
+        query_sample_quality_check_metrics.pdf
+        query_sample_query_sample_LFs.csv
+        query_sample_retrained_LFs_all_samples.csv
+        query_sample_stable_input.csv
 
-          # FUZZY
-          #--Step 4 output-- 
-          query_sample_archetype_weights_all_samples.csv
-          query_sample__archetype_weights.csv
+        # FUZZY
+        #--Step 4 output-- 
+        query_sample_archetype_weights_all_samples.csv
+        query_sample_archetype_weights.csv
 
-          #--Step5 output--
-          query_sample__archetype_projection.pdf
+        #--Step5 output--
+        query_sample_archetype_projection.pdf
 
-          # HARD
-          #--Step 4 output--
-          query_sample_sample_clusters.csv
+        # HARD
+        #--Step 4 output--
+        query_sample_sample_clusters.csv
 
-          #--Step 5 output-- 
-          query_sample_kmeans_cluster.pdf
-          query_sample_cluster_label_map.csv
-          query_sample_kmeans_heatmap.csv
+        #--Step 5 output-- 
+        query_sample_kmeans_cluster.pdf
+        query_sample_cluster_label_map.csv
+        query_sample_kmeans_heatmap.csv
 ```
