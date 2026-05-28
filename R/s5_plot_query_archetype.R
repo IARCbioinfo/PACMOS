@@ -329,7 +329,7 @@ plot_fuzzy_query_sample <- function(
         if (val > 0.05)
           graphics::text(1, y_bottom + val / 2,
                          labels = paste0(round(val * 100), "%"),
-                         col = "white", cex = 1.8, font = 2)
+                         col = "white", cex = 1.1, font = 2)
         y_bottom <- y_bottom + val
       }
     }
@@ -341,22 +341,29 @@ plot_fuzzy_query_sample <- function(
          las = 2, cex.axis = 1.8, col = "grey60", col.axis = "grey30")
 
     mtext(query_sample, side = 1, at = 1,
-          las = 1, cex = 1.8, col = "red", font = 2, line = 0.5)
+          las = 1, cex = 1.2, col = "red", font = 2, line = 0.5)
 
-    legend(x = 1, y = -0.08,
-           legend  = paste0(seq_len(n), ". ", vertex_labels),
-           fill    = vcols,
-           border  = "white",
-           ncol    = min(n, 3L),
-           cex     = 1.8,
-           bty     = "n",
-           xpd     = NA,
-           xjust   = 0.5,
-           yjust   = 1)
+    legend_ncol <- ceiling(n / 3)
+
+    legend(
+      x = 1,
+      y = -0.2,
+      legend     = paste0(seq_len(n), ". ", vertex_labels),
+      fill       = vcols,
+      border     = "white",
+      ncol       = legend_ncol,
+      cex        = 1.2,
+      x.intersp  = 1.2,
+      y.intersp  = 1.2,
+      bty        = "n",
+      xpd        = NA,
+      xjust      = 0.5,
+      yjust      = 1
+    )
 
     title(
       main      = paste0("Archetype composition - ", query_sample),
-      cex.main  = 2.2,
+      cex.main  = 1.4,
       font.main = 1,
       col.main  = "grey20"
     )
@@ -433,7 +440,7 @@ plot_fuzzy_query_sample <- function(
       # ---- page 1: ternary panels --------------------------------
       if (n <= 3) {
 
-        pdf(out_file, width = 6, height = 6)
+        pdf(out_file, width = 10, height = 8)
         par(mar = c(2, 2, 2, 2))
         .draw_simple_panel(weights, samples, vertex_labels,
                            vcols, query_sample)
@@ -454,8 +461,8 @@ plot_fuzzy_query_sample <- function(
         layout_mat_safe <- layout_mat
         layout_mat_safe[is.na(layout_mat_safe)] <- 0L
         pdf(out_file,
-            width  = n_cols * 5,
-            height = n_rows * 5 + 1.5)
+            width  = n_cols * 6.5,
+            height = n_rows * 5 + 2)
 
         layout(layout_mat_safe, heights = rep(5, n_rows))
         par(mar = c(4, 2, 3, 2), xpd = NA)
