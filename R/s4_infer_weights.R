@@ -1,7 +1,7 @@
-#' Infer Archetype Weights
+#' Infer Archetype proportion
 #'
 #' @description
-#' Computes archetype mixture weights for samples based on MOFA latent factors
+#' Computes archetype proportion for samples based on MOFA latent factors
 #' derived from Step 3 (`s3_plot_query_samples_mofa`).
 #'
 #' @details
@@ -9,18 +9,18 @@
 #' latent factor matrix produced by `s3_plot_query_samples_mofa()` —
 #' either `<sample_id>_stable_input.csv` or
 #' `<sample_id>_retrained_LFs_all_samples.csv` (controlled via `input_type`) —
-#' and infers archetype mixture weights using constrained least squares.
+#' and infers archetype proportion using constrained least squares.
 #'
 #'
 #' For each sample, two CSV files are written:
 #' \itemize{
-#'   \item `<sample_id>_archetype_weights.csv` — query sample only
-#'   \item `<sample_id>_archetype_weights_all_samples.csv` — all samples
+#'   \item `<sample_id>_archetype_proportion.csv` — query sample only
+#'   \item `<sample_id>_archetype_proportion_all_samples.csv` — all samples
 #' }
 #'
 #' Additionally, an aggregated CSV (query samples only) is written to `out_dir`.
 #'
-#' @name infer_fuzzy_weights
+#' @name infer_fuzzy_proportion
 #'
 #' @param models_dir      Character. Root directory folder. Same as `s1_add_sample_to_mofa() outdir`.
 #'
@@ -43,7 +43,7 @@
 #'   If \code{NULL}, all numeric latent factor columns are used.
 #'
 #' @param out_dir         Output directory for aggregated CSV. Defaults to
-#'   \code{models_dir/archetype_weights/}.
+#'   \code{models_dir/archetype_proportion/}.
 #'
 #' @param prefix          Optional character prefix for output files.
 #'
@@ -107,7 +107,7 @@
 #'   stringsAsFactors = FALSE
 #' )
 #'
-#' infer_fuzzy_weights(
+#' infer_fuzzy_proportion(
 #'   models_dir = out_dir,
 #'   coord = archetype_coords,
 #'   n_archetypes = 3,
@@ -116,13 +116,13 @@
 #' )
 #'
 #' @export
-infer_fuzzy_weights <- function(
+infer_fuzzy_proportion <- function(
     models_dir,
     coord,
     n_archetypes,
     reference_axes = NULL,
     input_type = c("stable", "retrained"),
-    out_dir  = file.path(models_dir, "archetype_weights"),
+    out_dir  = file.path(models_dir, "archetype_proportion"),
     prefix   = ""
 ) {
 
@@ -290,7 +290,7 @@ infer_fuzzy_weights <- function(
                                   Filter(Negate(is.null), all_rows_weights))
 
         if (is.null(all_samples_df) || nrow(all_samples_df) == 0) {
-          message("  [SKIP] No weights computed for any sample in: ", sample_id)
+          message("  [SKIP] No proportion computed for any sample in: ", sample_id)
           next
         }
 
@@ -309,7 +309,7 @@ infer_fuzzy_weights <- function(
 
         sample_csv <- file.path(sample_plot_dir,
                                 paste0(sample_id,
-                                       "_archetype_weights.csv"))
+                                       "_archetype_proportion.csv"))
         write.csv(query_df, sample_csv, row.names = FALSE)
         message("  Saved (query only) : ", basename(sample_csv))
 
@@ -317,7 +317,7 @@ infer_fuzzy_weights <- function(
 
         all_csv <- file.path(sample_plot_dir,
                              paste0(sample_id,
-                                    "_archetype_weights_all_samples.csv"))
+                                    "_archetype_proportion_all_samples.csv"))
         write.csv(all_samples_df, all_csv, row.names = FALSE)
         message("  Saved (all samples): ", basename(all_csv))
 
@@ -342,7 +342,7 @@ infer_fuzzy_weights <- function(
   )
 
   if (is.null(results_df) || nrow(results_df) == 0) {
-    stop("No archetype weights were computed for any sample.")
+    stop("No archetype proportion were computed for any sample.")
   }
 
   for (col in archetype_names)
@@ -351,7 +351,7 @@ infer_fuzzy_weights <- function(
 
   agg_csv <- file.path(out_dir,
                        paste0(prefix,
-                              "_archetype_weights.csv"))
+                              "_archetype_proportion.csv"))
   write.csv(results_df, agg_csv, row.names = FALSE)
 
   message("")

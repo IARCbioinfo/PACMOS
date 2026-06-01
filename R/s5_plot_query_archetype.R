@@ -1,13 +1,13 @@
 #' Plot archetype weight projections
 #'
 #' @description
-#' Visualizes archetype mixture weights for query and reference samples
+#' Visualizes archetype proportion for query and reference samples
 #' using ternary projections and composition plots.
 #'
 #' @details
 #' For each sample folder in `models_dir`, this function reads
-#' `<sample_id>_archetype_weights_all_samples.csv` produced by
-#' `infer_fuzzy_weights()` and generates a  PDF containing:
+#' `<sample_id>_archetype_proportion_all_samples.csv` produced by
+#' `infer_fuzzy_proportion()` and generates a  PDF containing:
 #'
 #' \itemize{
 #'   \item Ternary plots showing sample positions in archetype space
@@ -88,7 +88,7 @@
 #'   stringsAsFactors = FALSE
 #' )
 #'
-#' infer_fuzzy_weights(
+#' infer_fuzzy_proportion(
 #'   models_dir = out_dir,
 #'   coord = archetype_coords,
 #'   n_archetypes = 3,
@@ -405,12 +405,12 @@ plot_fuzzy_query_sample <- function(
 
     weight_files <- list.files(
       output_dir,
-      pattern    = "_archetype_weights_all_samples\\.csv$",
+      pattern    = "_archetype_proportion_all_samples\\.csv$",
       full.names = TRUE
     )
 
     if (!length(weight_files)) {
-      warning("No _archetype_weights_all_samples.csv in ", output_dir, " -- skipping.")
+      warning("No _archetype_proportion_all_samples.csv in ", output_dir, " -- skipping.")
       next
     }
 
@@ -432,7 +432,7 @@ plot_fuzzy_query_sample <- function(
         weights <- weights / rs
       }
 
-      csv_id   <- sub("_archetype_weights_all_samples\\.csv$", "", basename(file))
+      csv_id   <- sub("_archetype_proportion_all_samples\\.csv$", "", basename(file))
       out_file <- file.path(output_dir,
                             paste0(prefix, csv_id,
                                    "_archetype_projection.pdf"))
