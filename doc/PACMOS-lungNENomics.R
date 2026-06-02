@@ -1,29 +1,29 @@
 ## ----include = FALSE----------------------------------------------------------
 knitr::opts_chunk$set(
-collapse = TRUE,
-comment = "#>"
+  collapse = TRUE,
+  comment = "#>"
 )
 
 ## ----set-python, eval=FALSE---------------------------------------------------
-#  ## Linux/macOS
-#  Sys.setenv(
-#    PACMOS_PYTHON =
-#      "/home/lipikal/miniconda3/envs/pacmos_env/bin/python"
-#  ) # replace with your path
-#  
-#  ## Windows
-#  Sys.setenv(
-#    PACMOS_PYTHON =
-#      "C:/Users/YOUR_USERNAME/miniconda3/envs/pacmos_env/python.exe"
-#  ) # replace with your path
+# ## Linux/macOS
+# Sys.setenv(
+#   PACMOS_PYTHON =
+#     "/home/lipikal/miniconda3/envs/pacmos_env/bin/python"
+# ) # replace with your path
+# 
+# ## Windows
+# Sys.setenv(
+#   PACMOS_PYTHON =
+#     "C:/Users/YOUR_USERNAME/miniconda3/envs/pacmos_env/python.exe"
+# ) # replace with your path
 
 ## ----install, eval=FALSE------------------------------------------------------
-#  # install.packages("devtools")
-#  devtools::install_github(
-#    "IARCbioinfo/PACMOS",
-#    dependencies = TRUE,
-#    build_vignettes = TRUE
-#  )
+# # install.packages("devtools")
+# devtools::install_github(
+#   "IARCbioinfo/PACMOS",
+#   dependencies = TRUE,
+#   build_vignettes = TRUE
+# )
 
 ## ----setup--------------------------------------------------------------------
 library(PACMOS)
@@ -135,7 +135,7 @@ archetype_coords <- data.frame(
   stringsAsFactors = FALSE
 )
 
-PACMOS::infer_fuzzy_weights(
+PACMOS::infer_fuzzy_proportion(
   models_dir      = out_dir,
   coord           = archetype_coords,
   n_archetypes    = 4,

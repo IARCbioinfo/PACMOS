@@ -9,7 +9,7 @@ Authors@R:
 Description: PACMOS provides a workflow for integrating query samples into a reference multi-omics latent space. The package supports appending query samples to reference datasets, retraining MOFA models, aligning latent factors to a reference space, and projecting query samples for downstream analysis. Additional functionality includes clustering, archetype inference, and visualization tools to interpret query samples in a biological context.
 License: MIT + file LICENSE
 Encoding: UTF-8
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 VignetteBuilder: knitr
 Imports: 
     clue,

@@ -6,7 +6,7 @@ output:
     toc_depth: 2
 self_contained: true
 vignette: >
-  %\VignetteIndexEntry{2. PACMOS-lungNENomics-fuzzy-tutorial}
+  %\VignetteIndexEntry{PACMOS-lungNENomics-fuzzy-tutorial}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -47,7 +47,7 @@ This vignette demonstrates how to:
 1. Add query samples to MOFA reference inputs
 2. Run MOFA2 retraining
 3. Project query samples into the reference MOFA latent space
-4. Infer archetype weights of query samples
+4. Infer archetype proportion of query samples
 5. Visualize query samples within Pareto archetype space
 
 ## Step 0: Installation
@@ -262,9 +262,8 @@ The projection plot shows the query sample highlighted in red within the referen
 s3_results[[sample_to_show]]$plots$projection_pairs[[1]]
 ```
 
-## Step 4: Infer archetype weights
-This function estimates the contribution of predefined biological archetypes to each query sample using a fuzzy weighting approach. Based on the latent factor coordinates obtained from MOFA, it calculates the degree to which each sample belongs to each archetype.
-
+## Step 4: Infer archetype proportion
+This function estimates the contribution of predefined biological archetypes to each query sample using a least constraint square approach. Based on the latent factor coordinates obtained from MOFA, it calculates the degree to which each sample belongs to each archetype.
 The result is saved as a csv file in the `outputs` directory.
 
 ```{r run-step4, warning=FALSE}
@@ -278,7 +277,7 @@ archetype_coords <- data.frame(
   stringsAsFactors = FALSE
 )
 
-PACMOS::infer_fuzzy_weights(
+PACMOS::infer_fuzzy_proportion(
   models_dir      = out_dir,
   coord           = archetype_coords,
   n_archetypes    = 4,
@@ -289,7 +288,7 @@ cat("Outputs are saved in:", out_dir, "\n")
 ```
 
 ## Step 5: Plot results
-This function visualizes the archetype composition of query samples based on the inferred fuzzy weights.
+This function visualizes the archetype composition of query samples based on the inferred fuzzy proportion.
 
 ```{r run-step5, warning=FALSE}
 print('Starting Step 5')
