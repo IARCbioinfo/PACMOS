@@ -126,7 +126,7 @@ where,
 
 ## FUZZY CLUSTERING
 ### Step 4
-This function estimates the degree to which each query sample belongs to each biological archetype predefined in reference multiomics data using a fuzzy weighting approach.
+This function estimates the degree to which each query sample belongs to each biological archetype predefined in reference multiomics data using a fuzzy least constraint square approach.
 ```
 archetype_coords <- data.frame(
   Archetype = c("a", "b", "c"), # archetypes
@@ -143,13 +143,13 @@ archetype_coords <- data.frame(
   stringsAsFactors = FALSE
 )
 
-infer_fuzzy_weights(
+infer_fuzzy_proportion(
   models_dir,
   coord,
   n_archetypes,
   reference_axes = NULL,
   input_type = c("stable", "retrained"),
-  out_dir = file.path(models_dir, "archetype_weights"),
+  out_dir = file.path(models_dir, "archetype_proportion"),
   prefix = ""
 )
 ```
@@ -158,14 +158,14 @@ where,
   <li>models_dir      =  Root directory folder. Same as `s1_add_sample_to_mofa() outdir`.</li>
   <li>coord           =  Data frame of archetype coordinates</li>
   <li>n_archetypes    =  Expected number of archetypes.</li>
-  <li>reference_axes  =  Latent factors column names (from reference) to use for weight inference. These must match column names in the input matrices and correspond to the same dimensions used to define the archetype coordinates in `coord`. If NULL, all numeric columns are used.</li>
+  <li>reference_axes  =  Latent factors column names (from reference) to use for archetype proportion inference. These must match column names in the input matrices and correspond to the same dimensions used to define the archetype coordinates in `coord`. If NULL, all numeric columns are used.</li>
   <li>input_type      = Which aligned matrix to use as input. Either "stable" (reference + query; from `_stable_input.csv`) or "retrained" (all retrained model samples; from `_retrained_LFs_all_samples.csv`).</li>
-  <li>out_dir         = Output directory for aggregated CSV. Defaults to `models_dir/archetype_weights/`.</li>
+  <li>out_dir         = Output directory for aggregated CSV. Defaults to `models_dir/archetype_proportion/`.</li>
   <li>prefix          = Character prefix for output files</li>
 </ol>
 
 ### Step 5
-This function visualizes the archetype composition of query samples in the reference archetypal space based on the inferred fuzzy weights.
+This function visualizes the archetype composition of query samples in the reference archetypal space based on the inferred fuzzy archetype proportion.
 ```
 plot_fuzzy_query_sample(
   models_dir,
@@ -243,8 +243,8 @@ where,
 
         # FUZZY
         #--Step 4 output-- 
-        query_sample_archetype_weights_all_samples.csv
-        query_sample_archetype_weights.csv
+        query_sample_archetype_proportion_all_samples.csv
+        query_sample_archetype_proportion.csv
 
         #--Step5 output--
         query_sample_archetype_projection.pdf
